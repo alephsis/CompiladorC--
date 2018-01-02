@@ -1,0 +1,829 @@
+Gramática
+
+    0 $accept: program $end
+
+    1 $@1: /* vacío */
+
+    2 program: $@1 decl body
+
+    3 $@2: /* vacío */
+
+    4 decl: INT ID PYC $@2 decl
+    5     | /* vacío */
+
+    6 $@3: /* vacío */
+
+    7 body: MAIN $@3 LPAR RPAR LKEY block RKEY
+
+    8 block: sents
+    9      | /* vacío */
+
+   10 sents: sents sent
+   11      | sent
+
+   12 $@4: /* vacío */
+
+   13 sent: ID $@4 ASIG exp PYC
+   14     | IF LPAR cond RPAR LKEY block RKEY
+   15     | IF LPAR cond RPAR LKEY block RKEY ELSE LKEY block RKEY
+   16     | PRINT exp
+   17     | WHILE LPAR cond RPAR LKEY block RKEY
+   18     | BREAK PYC
+
+   19 cond: cond OR cond
+   20     | cond AND cond
+   21     | exp rel exp
+
+   22 rel: EQUAL
+   23    | NE
+   24    | GT
+   25    | LT
+
+   26 exp: exp ADD exp
+   27    | exp SUB exp
+   28    | exp MUL exp
+   29    | exp DIV exp
+   30    | NUM
+   31    | ID
+   32    | LPAR exp RPAR
+
+
+Terminales con las reglas donde aparecen
+
+$end (0) 0
+error (256)
+ID (258) 4 13 31
+NUM (259) 30
+INT (260) 4
+MAIN (261) 7
+PRINT (262) 16
+IF (263) 14 15
+WHILE (264) 17
+BREAK (265) 18
+PYC (266) 4 13 18
+LKEY (267) 7 14 15 17
+RKEY (268) 7 14 15 17
+ASIG (269) 13
+OR (270) 19
+AND (271) 20
+NE (272) 23
+EQUAL (273) 22
+LT (274) 25
+GT (275) 24
+SUB (276) 27
+ADD (277) 26
+DIV (278) 29
+MUL (279) 28
+LPAR (280) 7 14 15 17 32
+RPAR (281) 7 14 15 17 32
+IFX (282)
+ELSE (283) 15
+
+
+No terminales con las reglas donde aparecen
+
+$accept (29)
+    en la izquierda: 0
+program (30)
+    en la izquierda: 2, en la derecha: 0
+$@1 (31)
+    en la izquierda: 1, en la derecha: 2
+decl (32)
+    en la izquierda: 4 5, en la derecha: 2 4
+$@2 (33)
+    en la izquierda: 3, en la derecha: 4
+body (34)
+    en la izquierda: 7, en la derecha: 2
+$@3 (35)
+    en la izquierda: 6, en la derecha: 7
+block (36)
+    en la izquierda: 8 9, en la derecha: 7 14 15 17
+sents (37)
+    en la izquierda: 10 11, en la derecha: 8 10
+sent (38)
+    en la izquierda: 13 14 15 16 17 18, en la derecha: 10 11
+$@4 (39)
+    en la izquierda: 12, en la derecha: 13
+cond (40)
+    en la izquierda: 19 20 21, en la derecha: 14 15 17 19 20
+rel (41)
+    en la izquierda: 22 23 24 25, en la derecha: 21
+exp (42)
+    en la izquierda: 26 27 28 29 30 31 32, en la derecha: 13 16 21
+    26 27 28 29 32
+
+
+State 0
+
+    0 $accept: . program $end
+
+    $default  reduce usando la regla 1 ($@1)
+
+    program  ir al estado 1
+    $@1      ir al estado 2
+
+
+State 1
+
+    0 $accept: program . $end
+
+    $end  desplazar e ir al estado 3
+
+
+State 2
+
+    2 program: $@1 . decl body
+
+    INT  desplazar e ir al estado 4
+
+    $default  reduce usando la regla 5 (decl)
+
+    decl  ir al estado 5
+
+
+State 3
+
+    0 $accept: program $end .
+
+    $default  aceptar
+
+
+State 4
+
+    4 decl: INT . ID PYC $@2 decl
+
+    ID  desplazar e ir al estado 6
+
+
+State 5
+
+    2 program: $@1 decl . body
+
+    MAIN  desplazar e ir al estado 7
+
+    body  ir al estado 8
+
+
+State 6
+
+    4 decl: INT ID . PYC $@2 decl
+
+    PYC  desplazar e ir al estado 9
+
+
+State 7
+
+    7 body: MAIN . $@3 LPAR RPAR LKEY block RKEY
+
+    $default  reduce usando la regla 6 ($@3)
+
+    $@3  ir al estado 10
+
+
+State 8
+
+    2 program: $@1 decl body .
+
+    $default  reduce usando la regla 2 (program)
+
+
+State 9
+
+    4 decl: INT ID PYC . $@2 decl
+
+    $default  reduce usando la regla 3 ($@2)
+
+    $@2  ir al estado 11
+
+
+State 10
+
+    7 body: MAIN $@3 . LPAR RPAR LKEY block RKEY
+
+    LPAR  desplazar e ir al estado 12
+
+
+State 11
+
+    4 decl: INT ID PYC $@2 . decl
+
+    INT  desplazar e ir al estado 4
+
+    $default  reduce usando la regla 5 (decl)
+
+    decl  ir al estado 13
+
+
+State 12
+
+    7 body: MAIN $@3 LPAR . RPAR LKEY block RKEY
+
+    RPAR  desplazar e ir al estado 14
+
+
+State 13
+
+    4 decl: INT ID PYC $@2 decl .
+
+    $default  reduce usando la regla 4 (decl)
+
+
+State 14
+
+    7 body: MAIN $@3 LPAR RPAR . LKEY block RKEY
+
+    LKEY  desplazar e ir al estado 15
+
+
+State 15
+
+    7 body: MAIN $@3 LPAR RPAR LKEY . block RKEY
+
+    ID     desplazar e ir al estado 16
+    PRINT  desplazar e ir al estado 17
+    IF     desplazar e ir al estado 18
+    WHILE  desplazar e ir al estado 19
+    BREAK  desplazar e ir al estado 20
+
+    $default  reduce usando la regla 9 (block)
+
+    block  ir al estado 21
+    sents  ir al estado 22
+    sent   ir al estado 23
+
+
+State 16
+
+   13 sent: ID . $@4 ASIG exp PYC
+
+    $default  reduce usando la regla 12 ($@4)
+
+    $@4  ir al estado 24
+
+
+State 17
+
+   16 sent: PRINT . exp
+
+    ID    desplazar e ir al estado 25
+    NUM   desplazar e ir al estado 26
+    LPAR  desplazar e ir al estado 27
+
+    exp  ir al estado 28
+
+
+State 18
+
+   14 sent: IF . LPAR cond RPAR LKEY block RKEY
+   15     | IF . LPAR cond RPAR LKEY block RKEY ELSE LKEY block RKEY
+
+    LPAR  desplazar e ir al estado 29
+
+
+State 19
+
+   17 sent: WHILE . LPAR cond RPAR LKEY block RKEY
+
+    LPAR  desplazar e ir al estado 30
+
+
+State 20
+
+   18 sent: BREAK . PYC
+
+    PYC  desplazar e ir al estado 31
+
+
+State 21
+
+    7 body: MAIN $@3 LPAR RPAR LKEY block . RKEY
+
+    RKEY  desplazar e ir al estado 32
+
+
+State 22
+
+    8 block: sents .
+   10 sents: sents . sent
+
+    ID     desplazar e ir al estado 16
+    PRINT  desplazar e ir al estado 17
+    IF     desplazar e ir al estado 18
+    WHILE  desplazar e ir al estado 19
+    BREAK  desplazar e ir al estado 20
+
+    $default  reduce usando la regla 8 (block)
+
+    sent  ir al estado 33
+
+
+State 23
+
+   11 sents: sent .
+
+    $default  reduce usando la regla 11 (sents)
+
+
+State 24
+
+   13 sent: ID $@4 . ASIG exp PYC
+
+    ASIG  desplazar e ir al estado 34
+
+
+State 25
+
+   31 exp: ID .
+
+    $default  reduce usando la regla 31 (exp)
+
+
+State 26
+
+   30 exp: NUM .
+
+    $default  reduce usando la regla 30 (exp)
+
+
+State 27
+
+   32 exp: LPAR . exp RPAR
+
+    ID    desplazar e ir al estado 25
+    NUM   desplazar e ir al estado 26
+    LPAR  desplazar e ir al estado 27
+
+    exp  ir al estado 35
+
+
+State 28
+
+   16 sent: PRINT exp .
+   26 exp: exp . ADD exp
+   27    | exp . SUB exp
+   28    | exp . MUL exp
+   29    | exp . DIV exp
+
+    SUB  desplazar e ir al estado 36
+    ADD  desplazar e ir al estado 37
+    DIV  desplazar e ir al estado 38
+    MUL  desplazar e ir al estado 39
+
+    $default  reduce usando la regla 16 (sent)
+
+
+State 29
+
+   14 sent: IF LPAR . cond RPAR LKEY block RKEY
+   15     | IF LPAR . cond RPAR LKEY block RKEY ELSE LKEY block RKEY
+
+    ID    desplazar e ir al estado 25
+    NUM   desplazar e ir al estado 26
+    LPAR  desplazar e ir al estado 27
+
+    cond  ir al estado 40
+    exp   ir al estado 41
+
+
+State 30
+
+   17 sent: WHILE LPAR . cond RPAR LKEY block RKEY
+
+    ID    desplazar e ir al estado 25
+    NUM   desplazar e ir al estado 26
+    LPAR  desplazar e ir al estado 27
+
+    cond  ir al estado 42
+    exp   ir al estado 41
+
+
+State 31
+
+   18 sent: BREAK PYC .
+
+    $default  reduce usando la regla 18 (sent)
+
+
+State 32
+
+    7 body: MAIN $@3 LPAR RPAR LKEY block RKEY .
+
+    $default  reduce usando la regla 7 (body)
+
+
+State 33
+
+   10 sents: sents sent .
+
+    $default  reduce usando la regla 10 (sents)
+
+
+State 34
+
+   13 sent: ID $@4 ASIG . exp PYC
+
+    ID    desplazar e ir al estado 25
+    NUM   desplazar e ir al estado 26
+    LPAR  desplazar e ir al estado 27
+
+    exp  ir al estado 43
+
+
+State 35
+
+   26 exp: exp . ADD exp
+   27    | exp . SUB exp
+   28    | exp . MUL exp
+   29    | exp . DIV exp
+   32    | LPAR exp . RPAR
+
+    SUB   desplazar e ir al estado 36
+    ADD   desplazar e ir al estado 37
+    DIV   desplazar e ir al estado 38
+    MUL   desplazar e ir al estado 39
+    RPAR  desplazar e ir al estado 44
+
+
+State 36
+
+   27 exp: exp SUB . exp
+
+    ID    desplazar e ir al estado 25
+    NUM   desplazar e ir al estado 26
+    LPAR  desplazar e ir al estado 27
+
+    exp  ir al estado 45
+
+
+State 37
+
+   26 exp: exp ADD . exp
+
+    ID    desplazar e ir al estado 25
+    NUM   desplazar e ir al estado 26
+    LPAR  desplazar e ir al estado 27
+
+    exp  ir al estado 46
+
+
+State 38
+
+   29 exp: exp DIV . exp
+
+    ID    desplazar e ir al estado 25
+    NUM   desplazar e ir al estado 26
+    LPAR  desplazar e ir al estado 27
+
+    exp  ir al estado 47
+
+
+State 39
+
+   28 exp: exp MUL . exp
+
+    ID    desplazar e ir al estado 25
+    NUM   desplazar e ir al estado 26
+    LPAR  desplazar e ir al estado 27
+
+    exp  ir al estado 48
+
+
+State 40
+
+   14 sent: IF LPAR cond . RPAR LKEY block RKEY
+   15     | IF LPAR cond . RPAR LKEY block RKEY ELSE LKEY block RKEY
+   19 cond: cond . OR cond
+   20     | cond . AND cond
+
+    OR    desplazar e ir al estado 49
+    AND   desplazar e ir al estado 50
+    RPAR  desplazar e ir al estado 51
+
+
+State 41
+
+   21 cond: exp . rel exp
+   26 exp: exp . ADD exp
+   27    | exp . SUB exp
+   28    | exp . MUL exp
+   29    | exp . DIV exp
+
+    NE     desplazar e ir al estado 52
+    EQUAL  desplazar e ir al estado 53
+    LT     desplazar e ir al estado 54
+    GT     desplazar e ir al estado 55
+    SUB    desplazar e ir al estado 36
+    ADD    desplazar e ir al estado 37
+    DIV    desplazar e ir al estado 38
+    MUL    desplazar e ir al estado 39
+
+    rel  ir al estado 56
+
+
+State 42
+
+   17 sent: WHILE LPAR cond . RPAR LKEY block RKEY
+   19 cond: cond . OR cond
+   20     | cond . AND cond
+
+    OR    desplazar e ir al estado 49
+    AND   desplazar e ir al estado 50
+    RPAR  desplazar e ir al estado 57
+
+
+State 43
+
+   13 sent: ID $@4 ASIG exp . PYC
+   26 exp: exp . ADD exp
+   27    | exp . SUB exp
+   28    | exp . MUL exp
+   29    | exp . DIV exp
+
+    PYC  desplazar e ir al estado 58
+    SUB  desplazar e ir al estado 36
+    ADD  desplazar e ir al estado 37
+    DIV  desplazar e ir al estado 38
+    MUL  desplazar e ir al estado 39
+
+
+State 44
+
+   32 exp: LPAR exp RPAR .
+
+    $default  reduce usando la regla 32 (exp)
+
+
+State 45
+
+   26 exp: exp . ADD exp
+   27    | exp . SUB exp
+   27    | exp SUB exp .
+   28    | exp . MUL exp
+   29    | exp . DIV exp
+
+    DIV  desplazar e ir al estado 38
+    MUL  desplazar e ir al estado 39
+
+    $default  reduce usando la regla 27 (exp)
+
+
+State 46
+
+   26 exp: exp . ADD exp
+   26    | exp ADD exp .
+   27    | exp . SUB exp
+   28    | exp . MUL exp
+   29    | exp . DIV exp
+
+    DIV  desplazar e ir al estado 38
+    MUL  desplazar e ir al estado 39
+
+    $default  reduce usando la regla 26 (exp)
+
+
+State 47
+
+   26 exp: exp . ADD exp
+   27    | exp . SUB exp
+   28    | exp . MUL exp
+   29    | exp . DIV exp
+   29    | exp DIV exp .
+
+    $default  reduce usando la regla 29 (exp)
+
+
+State 48
+
+   26 exp: exp . ADD exp
+   27    | exp . SUB exp
+   28    | exp . MUL exp
+   28    | exp MUL exp .
+   29    | exp . DIV exp
+
+    $default  reduce usando la regla 28 (exp)
+
+
+State 49
+
+   19 cond: cond OR . cond
+
+    ID    desplazar e ir al estado 25
+    NUM   desplazar e ir al estado 26
+    LPAR  desplazar e ir al estado 27
+
+    cond  ir al estado 59
+    exp   ir al estado 41
+
+
+State 50
+
+   20 cond: cond AND . cond
+
+    ID    desplazar e ir al estado 25
+    NUM   desplazar e ir al estado 26
+    LPAR  desplazar e ir al estado 27
+
+    cond  ir al estado 60
+    exp   ir al estado 41
+
+
+State 51
+
+   14 sent: IF LPAR cond RPAR . LKEY block RKEY
+   15     | IF LPAR cond RPAR . LKEY block RKEY ELSE LKEY block RKEY
+
+    LKEY  desplazar e ir al estado 61
+
+
+State 52
+
+   23 rel: NE .
+
+    $default  reduce usando la regla 23 (rel)
+
+
+State 53
+
+   22 rel: EQUAL .
+
+    $default  reduce usando la regla 22 (rel)
+
+
+State 54
+
+   25 rel: LT .
+
+    $default  reduce usando la regla 25 (rel)
+
+
+State 55
+
+   24 rel: GT .
+
+    $default  reduce usando la regla 24 (rel)
+
+
+State 56
+
+   21 cond: exp rel . exp
+
+    ID    desplazar e ir al estado 25
+    NUM   desplazar e ir al estado 26
+    LPAR  desplazar e ir al estado 27
+
+    exp  ir al estado 62
+
+
+State 57
+
+   17 sent: WHILE LPAR cond RPAR . LKEY block RKEY
+
+    LKEY  desplazar e ir al estado 63
+
+
+State 58
+
+   13 sent: ID $@4 ASIG exp PYC .
+
+    $default  reduce usando la regla 13 (sent)
+
+
+State 59
+
+   19 cond: cond . OR cond
+   19     | cond OR cond .
+   20     | cond . AND cond
+
+    AND  desplazar e ir al estado 50
+
+    $default  reduce usando la regla 19 (cond)
+
+
+State 60
+
+   19 cond: cond . OR cond
+   20     | cond . AND cond
+   20     | cond AND cond .
+
+    $default  reduce usando la regla 20 (cond)
+
+
+State 61
+
+   14 sent: IF LPAR cond RPAR LKEY . block RKEY
+   15     | IF LPAR cond RPAR LKEY . block RKEY ELSE LKEY block RKEY
+
+    ID     desplazar e ir al estado 16
+    PRINT  desplazar e ir al estado 17
+    IF     desplazar e ir al estado 18
+    WHILE  desplazar e ir al estado 19
+    BREAK  desplazar e ir al estado 20
+
+    $default  reduce usando la regla 9 (block)
+
+    block  ir al estado 64
+    sents  ir al estado 22
+    sent   ir al estado 23
+
+
+State 62
+
+   21 cond: exp rel exp .
+   26 exp: exp . ADD exp
+   27    | exp . SUB exp
+   28    | exp . MUL exp
+   29    | exp . DIV exp
+
+    SUB  desplazar e ir al estado 36
+    ADD  desplazar e ir al estado 37
+    DIV  desplazar e ir al estado 38
+    MUL  desplazar e ir al estado 39
+
+    $default  reduce usando la regla 21 (cond)
+
+
+State 63
+
+   17 sent: WHILE LPAR cond RPAR LKEY . block RKEY
+
+    ID     desplazar e ir al estado 16
+    PRINT  desplazar e ir al estado 17
+    IF     desplazar e ir al estado 18
+    WHILE  desplazar e ir al estado 19
+    BREAK  desplazar e ir al estado 20
+
+    $default  reduce usando la regla 9 (block)
+
+    block  ir al estado 65
+    sents  ir al estado 22
+    sent   ir al estado 23
+
+
+State 64
+
+   14 sent: IF LPAR cond RPAR LKEY block . RKEY
+   15     | IF LPAR cond RPAR LKEY block . RKEY ELSE LKEY block RKEY
+
+    RKEY  desplazar e ir al estado 66
+
+
+State 65
+
+   17 sent: WHILE LPAR cond RPAR LKEY block . RKEY
+
+    RKEY  desplazar e ir al estado 67
+
+
+State 66
+
+   14 sent: IF LPAR cond RPAR LKEY block RKEY .
+   15     | IF LPAR cond RPAR LKEY block RKEY . ELSE LKEY block RKEY
+
+    ELSE  desplazar e ir al estado 68
+
+    $default  reduce usando la regla 14 (sent)
+
+
+State 67
+
+   17 sent: WHILE LPAR cond RPAR LKEY block RKEY .
+
+    $default  reduce usando la regla 17 (sent)
+
+
+State 68
+
+   15 sent: IF LPAR cond RPAR LKEY block RKEY ELSE . LKEY block RKEY
+
+    LKEY  desplazar e ir al estado 69
+
+
+State 69
+
+   15 sent: IF LPAR cond RPAR LKEY block RKEY ELSE LKEY . block RKEY
+
+    ID     desplazar e ir al estado 16
+    PRINT  desplazar e ir al estado 17
+    IF     desplazar e ir al estado 18
+    WHILE  desplazar e ir al estado 19
+    BREAK  desplazar e ir al estado 20
+
+    $default  reduce usando la regla 9 (block)
+
+    block  ir al estado 70
+    sents  ir al estado 22
+    sent   ir al estado 23
+
+
+State 70
+
+   15 sent: IF LPAR cond RPAR LKEY block RKEY ELSE LKEY block . RKEY
+
+    RKEY  desplazar e ir al estado 71
+
+
+State 71
+
+   15 sent: IF LPAR cond RPAR LKEY block RKEY ELSE LKEY block RKEY .
+
+    $default  reduce usando la regla 15 (sent)

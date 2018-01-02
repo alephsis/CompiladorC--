@@ -1,0 +1,17 @@
+int a;
+int b;
+
+void main(){
+    if(a < 3){
+        a= 3+5;
+        if( a== 8){
+            a = 5;
+        }
+        a= a-1;
+    }else{
+        a= 2;
+        while(b!=3){
+            b = b + 2;
+        }
+    }
+}

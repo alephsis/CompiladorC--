@@ -8,8 +8,12 @@
 
 
 id [a-zA-Z_][a-zA-Z0-9_]*
-entero [0-9]+
+numero [0-9]+
 espacio [ \t\n]
+doble   [0-9]+\.[0-9]+[0-9]+
+flotante [0-9]+\.[0-9]+
+caracter[a-zA-Z_]
+cadena [a-zA-Z0-9_]+
 
 %%
 
@@ -63,7 +67,7 @@ break {
         return ID;
     }
     
-{entero} {
+{numero} {
             yylval.line = yylineno;
             yylval.nval = atoi(yytext);
             return NUM;
@@ -147,11 +151,78 @@ break {
         yylval.line = yylineno;
         return LPAR;
     }
+
+"true" {
+        yylval.line = yylineno;
+        return TRUE;
+    }
+
+"false" { 
+        yylval.line = yylineno;
+        return  FALSE;
+    }
+
+"float" {
+        yylval.line = yylineno;
+        return FLOAT;
+    }
+
+"double" { 
+        yylval.line = yylineno;
+        return  DOUBLE;
+    }
+
+"char" { 
+        yylval.line = yylineno;
+        return  CHAR;
+    }
+
+"switch" { 
+        yylval.line = yylineno;
+        return  SWITCH;
+    }
+
+"for" { 
+        yylval.line = yylineno;
+        return  FOR;
+    }
     
+"func" { 
+        yylval.line = yylineno;
+        return  FUNC;
+    }
+"default" { 
+        yylval.line = yylineno;
+        return  DEFAULT;
+    }
+
+"return" { 
+        yylval.line = yylineno;
+        return  RETURN;
+    }
+
+"struct" { 
+        yylval.line = yylineno;
+        return  STRUCT;
+    }
+
+"/*" { 
+        yylval.line = yylineno;
+        return  RLC;
+    }
+
+"*/" { 
+        yylval.line = yylineno;
+        return  LLC;
+    } 
+
+ "//" { 
+        yylval.line = yylineno;
+        return  SC;
+    }
 {espacio} {}
 
 . { printf("ERROR: %s en la línea %d\n", yytext, yylineno);}
 
 %%
-
 

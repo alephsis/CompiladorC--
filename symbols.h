@@ -4,7 +4,7 @@
 typedef struct _symbol{
     char id[32];
     int dir;
-    int type;
+    char* type;
     int var;
 } symbol;
 
@@ -22,14 +22,14 @@ int search(char *id);
 
 int insert(symbol sym);
 
-int get_type(char *id);
+char* get_type(char *id);
 
 int get_dir(char *id);
 
 int get_var(char *id);
 
 
-int set_type(char *id, int type);
+int set_type(char *id, char* type);
 
 int set_dir(char *id, int dir);
 

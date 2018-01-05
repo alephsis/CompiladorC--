@@ -39,9 +39,10 @@
 #if YYDEBUG
 extern int yydebug;
 #endif
+
 #include "attribs.h"
-#include "symbols.c"
 #include "intermediate_code.c"
+#include "symbols.c"
 
 /* Token type.  */
 #ifndef YYTOKENTYPE
@@ -60,21 +61,38 @@ extern int yydebug;
     PYC = 267,
     LKEY = 268,
     RKEY = 269,
-    ASIG = 270,
-    OR = 271,
-    AND = 272,
-    EQUAL = 273,
-    NE = 274,
-    GT = 275,
-    LT = 276,
-    ADD = 277,
-    SUB = 278,
-    MUL = 279,
-    DIV = 280,
-    RPAR = 281,
-    LPAR = 282,
-    IFX = 283,
-    ELSE = 284
+    TRUE = 270,
+    FALSE = 271,
+    FLOAT = 272,
+    DOUBLE = 273,
+    CHAR = 274,
+    SWITCH = 275,
+    FOR = 276,
+    FUNC = 277,
+    DEFAULT = 278,
+    RETURN = 279,
+    STRUCT = 280,
+    RLC = 281,
+    LLC = 282,
+    SC = 283,
+    COMMA = 284,
+    LBRACK = 285,
+    RBRACK = 286,
+    ASIG = 287,
+    OR = 288,
+    AND = 289,
+    EQUAL = 290,
+    NE = 291,
+    GT = 292,
+    LT = 293,
+    ADD = 294,
+    SUB = 295,
+    MUL = 296,
+    DIV = 297,
+    RPAR = 298,
+    LPAR = 299,
+    IFX = 300,
+    ELSE = 301
   };
 #endif
 
@@ -83,7 +101,7 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 29 "semantic.y" /* yacc.c:1909  */
+#line 33 "semantic.y" /* yacc.c:1909  */
 
     char sval[32];
     char ssval[3];
@@ -92,8 +110,10 @@ union YYSTYPE
     sentence stval;
     int nval;
     int line;
+    type tval;
+    arrayType arrtval;
 
-#line 94 "semantic.tab.h" /* yacc.c:1909  */
+#line 113 "semantic.tab.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;

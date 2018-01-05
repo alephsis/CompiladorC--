@@ -1,5 +1,5 @@
-int a;
-int b;
+double a[2][9];
+float  b[5][5];
 
 void main(){
     if(a < 3){

@@ -28,12 +28,12 @@ int insert(symbol sym){
 }
     
 
-int get_type(char *id){
+char* get_type(char *id){
     int pos = search(id);
     if(pos != -1){
         return SYM_TABLE.syms[pos].type;
     }
-    return -1;
+    return "";
 }
 
 int get_dir(char *id){
@@ -53,7 +53,7 @@ int get_var(char *id){
 }
 
 
-int set_type(char *id, int type){
+int set_type(char *id, char* type){
     int pos = search(id);
     if(pos != -1){
         SYM_TABLE.syms[pos].type = type;
@@ -85,6 +85,6 @@ void print_table(){
     printf("*** TABLA DE SIMBOLOS ***\n");
     printf("pos\tid\ttipo\tdir\tvar\n");
     for(int i = 0; i<SYM_TABLE.next; i++){
-        printf("%d\t%s\t%d\t%d\t%d\n",i,SYM_TABLE.syms[i].id, SYM_TABLE.syms[i].type, SYM_TABLE.syms[i].dir, SYM_TABLE.syms[i].var);
+        printf("%d\t%s\t%s\t%d\t%d\n",i,SYM_TABLE.syms[i].id, SYM_TABLE.syms[i].type, SYM_TABLE.syms[i].dir, SYM_TABLE.syms[i].var);
     }
 }

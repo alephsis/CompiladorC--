@@ -1,5 +1,6 @@
 %{
 #include <stdio.h>
+#include <stdlib.h>
 #include "attribs.h"
 #include "symbols.h"
 #include "intermediate_code.h"
@@ -13,7 +14,9 @@ void yyerror(char *s);
 int dir;
 int temporales;
 int siginst;
-
+char* tipoGlobal;
+int dimGlobal;
+ 
 void init();
 int existe(char *id);
 expresion operacion(expresion e1, expresion e2, char *op);
@@ -23,6 +26,7 @@ condition relacional(expresion e1, expresion e2, char *oprel);
 condition and(condition c1, condition c2);
 condition or(condition c1, condition c2);
 void newLabel(char *s);
+char* getArrayType(int n, char* t);
 
 %}
 
@@ -34,6 +38,8 @@ void newLabel(char *s);
     sentence stval;
     int nval;
     int line;
+    type tval;
+    arrayType arrtval;
 }
 
 %token <sval> ID
@@ -42,6 +48,20 @@ void newLabel(char *s);
 %token IF WHILE BREAK 
 %token PYC
 %token LKEY RKEY
+%token TRUE FALSE
+%token FLOAT DOUBLE CHAR
+%token SWITCH
+%token FOR
+%token FUNC
+%token DEFAULT
+%token RETURN
+%token STRUCT
+%token RLC
+%token LLC
+%token SC
+%token COMMA
+%token LBRACK
+%token RBRACK
 
 %left ASIG
 %left OR
@@ -56,8 +76,11 @@ void newLabel(char *s);
 
 %type<eval> exp;
 %type<cval> cond;
+%type<tval> tipo idlist;
+%type<arrtval> tipoarreglo;
 %type<stval> sents sent block goto_else
 %type<ssval> rel 
+
 
 %start program
 
@@ -68,23 +91,78 @@ program : {init();}
             print_table();
             print_code();
          };
-
          
-decl: INT ID PYC {
-            if(existe($2)==-1){
-                printf("insertando %s\n",$2);
-                symbol sym;
-                strcpy(sym.id, $2);
-                sym.dir = dir;
-                sym.type = 1;
-                sym.var = 0;
-                insert(sym);
-                dir+= 4;
-            }else{
-                yyerror("Identificador duplicado");
-            }
-    } decl | ;
-    
+decl: tipo{      
+      tipoGlobal = $1.tipo;
+      dimGlobal  = $1.dim;
+} idlist
+| decl decl
+| ;
+
+tipo: INT {
+       $$.tipo = "int";
+       $$.dim = 4;
+	  }
+| FLOAT  {
+       $$.tipo = "float";
+       $$.dim = 4;
+	  }
+| DOUBLE  {
+       $$.tipo = "double";
+       $$.dim = 8;
+  }
+| CHAR  {
+       $$.tipo = "char";
+       $$.dim = 1;
+	  }
+/*| VOID  {
+       $$.tipo = "void";
+       $$.dim = -1;
+       }*/
+| STRUCT LKEY decl RKEY {
+  $$.tipo = "struct";
+  $$.dim = -1;
+	  } ;
+
+idlist: idlist COMMA ID  tipoarreglo{
+	     if(existe($3)==-1){
+	       printf("insertando %s\n",$3);
+	       symbol sym;
+	       strcpy(sym.id, $3);
+	       sym.dir = dir;
+	       sym.type = $4.tipo;
+	       sym.var = 0;
+	       insert(sym);
+	       dir+= $4.dim;
+	     }else{
+	       yyerror("Identificador duplicado");
+	     }
+           } PYC ;
+| ID  tipoarreglo{
+	   if(existe($1)==-1){
+	     printf("insertando %s\n",$1);
+	     symbol sym;
+	     strcpy(sym.id, $1);
+	     sym.dir = dir;
+	     sym.type = $2.tipo;
+	     sym.var = 0;
+	     insert(sym);
+	     dir += $2.dim;
+	   }else{
+	     yyerror("Identificador duplicado");
+	   }	    
+} PYC ;
+
+tipoarreglo: LBRACK NUM RBRACK tipoarreglo{
+  $$.tipo = getArrayType($2, $4.tipo);
+  $$.dim = $2 * $4.dim;
+  }
+| {
+  if(dimGlobal == -1)
+    yyerror("Tipo inválido para un arreglo");
+  $$.tipo = tipoGlobal;
+  $$.dim = dimGlobal;
+  };
 
 function: VOID MAIN {gen_code("label","","","main");} LPAR RPAR LKEY block {
             siginst = gen_code("label","","","end");
@@ -189,6 +267,7 @@ exp :  exp ADD exp { $$ = operacion($1, $3,$2);}
 
 void yyerror(char* s){
     printf("ERROR:%s, en  la linea %d\n",s, yylval.line);
+    exit(1);
 }
 
 void newLabel(char *s){
@@ -282,6 +361,12 @@ condition and(condition c1, condition c2){
     return c;
 }
 
+char* getArrayType(int n, char* t){
+    char* ret= (char*)malloc(100*sizeof(char)); 
+    sprintf(ret,"array [%d] of type %s",n,t);
+    return ret;
+}
+
 int main(int argc, char** argv){
     if(argc>1){
         yyin = fopen(argv[1], "r");
@@ -290,3 +375,8 @@ int main(int argc, char** argv){
         fclose(yyin);
     }
 }
+/*
+#include "attribs.h"
+#include "intermediate_code.c"
+#include "symbols.c"
+*/

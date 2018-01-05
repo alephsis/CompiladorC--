@@ -30,5 +30,17 @@ typedef struct _sentence{
     int first;    
 } sentence;
 
+typedef struct _type{
+  char* tipo;
+  int dim;
+} type;
+
+typedef struct _arrayType{
+  char* tipo;  
+  char* baseType;
+  int dim;
+  int baseDim;
+
+} arrayType;
 
 #endif

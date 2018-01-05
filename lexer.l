@@ -8,14 +8,16 @@
 
 
 id [a-zA-Z_][a-zA-Z0-9_]*
-numero [0-9]+
+numero [0-9]+(\.[0-9]+)?
 espacio [ \t\n]
-doble   [0-9]+\.[0-9]+[0-9]+
-flotante [0-9]+\.[0-9]+
 caracter[a-zA-Z_]
 cadena [a-zA-Z0-9_]+
 
 %%
+"," { 
+       yylval.line = yylineno;
+       return COMMA;
+    }
 
 ";" { 
         yylval.line = yylineno;
@@ -61,6 +63,60 @@ break {
         return BREAK;
     }
 
+"true" {
+        yylval.line = yylineno;
+        return TRUE;
+    }
+
+"false" { 
+        yylval.line = yylineno;
+        return  FALSE;
+    }
+
+"float" {
+        yylval.line = yylineno;
+        return FLOAT;
+    }
+
+"double" { 
+        yylval.line = yylineno;
+        return  DOUBLE;
+    }
+
+"char" { 
+        yylval.line = yylineno;
+        return  CHAR;
+    }
+
+"switch" { 
+        yylval.line = yylineno;
+        return  SWITCH;
+    }
+
+"for" { 
+        yylval.line = yylineno;
+        return  FOR;
+    }
+    
+"func" { 
+        yylval.line = yylineno;
+        return  FUNC;
+    }
+"default" { 
+        yylval.line = yylineno;
+        return  DEFAULT;
+    }
+
+"return" { 
+        yylval.line = yylineno;
+        return  RETURN;
+    }
+
+"struct" { 
+        yylval.line = yylineno;
+        return  STRUCT;
+    }
+
 {id} {  
         yylval.line = yylineno;
         strcpy(yylval.sval, yytext);
@@ -82,7 +138,18 @@ break {
 "}" {   
         yylval.line = yylineno;
         return RKEY;
+}
+
+"[" {   
+        yylval.line = yylineno;
+        return LBRACK;
     }
+
+"]" {   
+        yylval.line = yylineno;
+        return RBRACK;
+    }
+
 
 "=" {   
         yylval.line = yylineno;
@@ -150,60 +217,6 @@ break {
 "(" {
         yylval.line = yylineno;
         return LPAR;
-    }
-
-"true" {
-        yylval.line = yylineno;
-        return TRUE;
-    }
-
-"false" { 
-        yylval.line = yylineno;
-        return  FALSE;
-    }
-
-"float" {
-        yylval.line = yylineno;
-        return FLOAT;
-    }
-
-"double" { 
-        yylval.line = yylineno;
-        return  DOUBLE;
-    }
-
-"char" { 
-        yylval.line = yylineno;
-        return  CHAR;
-    }
-
-"switch" { 
-        yylval.line = yylineno;
-        return  SWITCH;
-    }
-
-"for" { 
-        yylval.line = yylineno;
-        return  FOR;
-    }
-    
-"func" { 
-        yylval.line = yylineno;
-        return  FUNC;
-    }
-"default" { 
-        yylval.line = yylineno;
-        return  DEFAULT;
-    }
-
-"return" { 
-        yylval.line = yylineno;
-        return  RETURN;
-    }
-
-"struct" { 
-        yylval.line = yylineno;
-        return  STRUCT;
     }
 
 "/*" { 

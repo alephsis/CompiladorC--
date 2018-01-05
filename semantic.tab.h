@@ -78,21 +78,23 @@ extern int yydebug;
     COMMA = 284,
     LBRACK = 285,
     RBRACK = 286,
-    ASIG = 287,
-    OR = 288,
-    AND = 289,
-    EQUAL = 290,
-    NE = 291,
-    GT = 292,
-    LT = 293,
-    ADD = 294,
-    SUB = 295,
-    MUL = 296,
-    DIV = 297,
-    RPAR = 298,
-    LPAR = 299,
-    IFX = 300,
-    ELSE = 301
+    GTE = 287,
+    LTE = 288,
+    ASIG = 289,
+    OR = 290,
+    AND = 291,
+    EQUAL = 292,
+    NE = 293,
+    GT = 294,
+    LT = 295,
+    ADD = 296,
+    SUB = 297,
+    MUL = 298,
+    DIV = 299,
+    RPAR = 300,
+    LPAR = 301,
+    IFX = 302,
+    ELSE = 303
   };
 #endif
 
@@ -113,7 +115,7 @@ union YYSTYPE
     type tval;
     arrayType arrtval;
 
-#line 113 "semantic.tab.h" /* yacc.c:1909  */
+#line 115 "semantic.tab.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;

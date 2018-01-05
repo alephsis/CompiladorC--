@@ -62,6 +62,7 @@ char* getArrayType(int n, char* t);
 %token COMMA
 %token LBRACK
 %token RBRACK
+%token GTE LTE
 
 %left ASIG
 %left OR

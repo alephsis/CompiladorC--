@@ -10,11 +10,10 @@
 id [a-zA-Z_][a-zA-Z0-9_]*
 numero [0-9]+
 espacio [ \t\n]
-doble   [0-9]+\.[0-9]+[0-9]+
-flotante [0-9]+\.[0-9]+
+doble   [0-9]+\.[0-9]+
+flotante [0-9]+\.[0-9]
 caracter[a-zA-Z_]
-cadena [a-zA-Z0-9_]+
-
+cadena  \"[^\"]*\"
 %%
 
 ";" { 
@@ -121,6 +120,18 @@ break {
         yylval.line = yylineno;
         strcpy(yylval.ssval, yytext);
         return LT;
+    }
+ 
+">=" {   
+        yylval.line = yylineno;
+        strcpy(yylval.ssval, yytext);
+        return GTE;
+    }
+    
+"<=" {   
+        yylval.line = yylineno;
+        strcpy(yylval.ssval, yytext);
+        return LTE;
     }
     
 "+" { 

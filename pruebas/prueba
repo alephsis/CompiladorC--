@@ -1,7 +1,13 @@
 int a;
 
-void main(){
+func void f1(){
+    int z;		
     if(a < 3){
         a= 3+5;
     }
+}
+
+func void f2(){
+     int b;
+       a = 8 + 1;
 }

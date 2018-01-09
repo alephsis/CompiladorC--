@@ -1,11 +1,21 @@
 #ifndef SYMBOLS_H
 #define SYMBOLS_H
 
+/* Define a Node for the lists of parameters */
+typedef struct NodeParam NodeParam;
+struct NodeParam {
+    char* data;
+    NodeParam *next;
+};
+
+
 typedef struct _symbol{
     char id[32];
     int dir;
     char* type;
-    int var;
+    char* var;
+    int listLength;
+    NodeParam list;
 } symbol;
 
 
@@ -14,7 +24,21 @@ typedef struct _symbols_table{
     int next;
 } symbols_table;
 
-symbols_table SYM_TABLE;
+/* Define a Node for the stack */
+typedef struct Node Node;
+struct Node {
+    symbols_table data;
+    Node *next;
+};
+
+typedef struct ListParam ListParam;
+struct ListParam {
+    NodeParam lista;
+  int listaTam;
+};
+
+
+Node STACK_TOP;
 
 void init_table();
 
@@ -22,19 +46,24 @@ int search(char *id);
 
 int insert(symbol sym);
 
+void addParam(NodeParam lista, char* data);
+
 char* get_type(char *id);
 
 int get_dir(char *id);
 
-int get_var(char *id);
-
+char* get_var(char *id);
 
 int set_type(char *id, char* type);
 
 int set_dir(char *id, int dir);
 
-int set_var(char *id, int var);
+int set_var(char *id, char* var);
 
 void print_table();
+
+void pushST(symbols_table elem);
+
+symbols_table popST();
 
 #endif

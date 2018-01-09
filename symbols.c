@@ -2,27 +2,37 @@
 #include <stdio.h>
 #include <string.h>
 
-void init_table(){
-    symbols_table SYM_TABLE;
-    SYM_TABLE.next=0;
+
+
+void init_table(){ /* this sould be called init_stack xD */
+    Node STACK_TOP;
+    symbols_table sym_table;
+    sym_table.next = 0;
+    STACK_TOP.data = sym_table;
+    STACK_TOP.next = NULL;
 }
 
+
 int search(char *id){
-    for(int i = 0; i <= SYM_TABLE.next; i++){
-        if(strcmp(id, SYM_TABLE.syms[i].id)==0){
-            return i;
-        }
+  Node* actual = &STACK_TOP;
+  while(actual != NULL){
+    for(int i = 0; i <= actual->data.next; i++){
+      if(strcmp(id, actual->data.syms[i].id)==0){
+	return i;
+      }
     }
+    actual = actual->next;
+  }
     return -1;
 }
 
 int insert(symbol sym){
     int pos = search(sym.id);
     
-    if(SYM_TABLE.next<1000 && pos ==-1){        
-        SYM_TABLE.syms[SYM_TABLE.next] = sym;
-        SYM_TABLE.next++;
-        return SYM_TABLE.next;
+    if(STACK_TOP.data.next<1000 && pos ==-1){        
+        STACK_TOP.data.syms[STACK_TOP.data.next] = sym;
+        STACK_TOP.data.next++;
+        return STACK_TOP.data.next;
     }
     return -1;
 }
@@ -31,7 +41,7 @@ int insert(symbol sym){
 char* get_type(char *id){
     int pos = search(id);
     if(pos != -1){
-        return SYM_TABLE.syms[pos].type;
+        return STACK_TOP.data.syms[pos].type;
     }
     return "";
 }
@@ -39,42 +49,41 @@ char* get_type(char *id){
 int get_dir(char *id){
     int pos = search(id);
     if(pos != -1){
-        return SYM_TABLE.syms[pos].dir;
+        return STACK_TOP.data.syms[pos].dir;
     }
     return -1;
 }
 
-int get_var(char *id){
+char* get_var(char *id){
     int pos = search(id);
     if(pos != -1){
-        return SYM_TABLE.syms[pos].var;
+        return STACK_TOP.data.syms[pos].var;
     }
-    return -1;
+    return NULL;
 }
 
 
 int set_type(char *id, char* type){
     int pos = search(id);
     if(pos != -1){
-        SYM_TABLE.syms[pos].type = type;
+        STACK_TOP.data.syms[pos].type = type;
         return pos;
     }
     return -1;
 }
-
 int set_dir(char *id, int dir){
     int pos = search(id);
     if(pos != -1){
-        SYM_TABLE.syms[pos].dir= dir;
+        STACK_TOP.data.syms[pos].dir= dir;
         return pos;
     }
     return -1;
 }
 
-int set_var(char *id, int var){
+int set_var(char *id, char* var){
     int pos = search(id);
     if(pos != -1){
-        SYM_TABLE.syms[pos].var = var;
+        STACK_TOP.data.syms[pos].var = var;
         return pos;
     }
     return -1;
@@ -84,7 +93,31 @@ int set_var(char *id, int var){
 void print_table(){
     printf("*** TABLA DE SIMBOLOS ***\n");
     printf("pos\tid\ttipo\tdir\tvar\n");
-    for(int i = 0; i<SYM_TABLE.next; i++){
-        printf("%d\t%s\t%s\t%d\t%d\n",i,SYM_TABLE.syms[i].id, SYM_TABLE.syms[i].type, SYM_TABLE.syms[i].dir, SYM_TABLE.syms[i].var);
+    for(int i = 0; i<STACK_TOP.data.next; i++){
+        printf("%d\t%s\t%s\t%d\t%s\n",i,STACK_TOP.data.syms[i].id, STACK_TOP.data.syms[i].type, STACK_TOP.data.syms[i].dir, STACK_TOP.data.syms[i].var);
     }
+}
+
+void pushST(symbols_table elem){
+  Node temp;
+  temp.data = STACK_TOP.data;
+  temp.next = STACK_TOP.next;
+  STACK_TOP.data = elem;
+  STACK_TOP.next = &temp;
+}
+
+symbols_table popST(){
+    symbols_table ret = STACK_TOP.data;
+    STACK_TOP = *(STACK_TOP.next);
+    return ret;
+}
+
+/* Añade un nuevo elemento(tipo) a una lista de parametros */
+void addParam(NodeParam lista, char* tipo){
+    
+    NodeParam nuevo;
+    nuevo.data = tipo;
+    nuevo.next = NULL;
+    lista.next = &nuevo;
+
 }

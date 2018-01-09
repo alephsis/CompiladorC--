@@ -39,7 +39,6 @@
 #if YYDEBUG
 extern int yydebug;
 #endif
-
 #include "attribs.h"
 #include "intermediate_code.c"
 #include "symbols.c"
@@ -103,7 +102,7 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 33 "semantic.y" /* yacc.c:1909  */
+#line 34 "semantic.y" /* yacc.c:1909  */
 
     char sval[32];
     char ssval[3];
@@ -114,8 +113,10 @@ union YYSTYPE
     int line;
     type tval;
     arrayType arrtval;
+    ListParam listsval;
+ 
 
-#line 115 "semantic.tab.h" /* yacc.c:1909  */
+#line 117 "semantic.tab.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;

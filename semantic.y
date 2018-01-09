@@ -12,6 +12,7 @@ void yyerror(char *s);
 
 
 int dir;
+int dirTemp;
 int temporales;
 int siginst;
 char* tipoGlobal;
@@ -40,7 +41,8 @@ char* getArrayType(int n, char* t);
     int line;
     type tval;
     arrayType arrtval;
-}
+    ListParam listsval;
+ }
 
 %token <sval> ID
 %token <nval> NUM
@@ -78,9 +80,11 @@ char* getArrayType(int n, char* t);
 %type<eval> exp;
 %type<cval> cond;
 %type<tval> tipo idlist;
-%type<arrtval> tipoarreglo;
+%type<arrtval> tipoarreglo arrayparam;
+%type<listsval> paramlist paramlistdef
 %type<stval> sents sent block goto_else
-%type<ssval> rel 
+%type<ssval> rel
+
 
 
 %start program
@@ -116,10 +120,10 @@ tipo: INT {
        $$.tipo = "char";
        $$.dim = 1;
 	  }
-/*| VOID  {
+| VOID  {
        $$.tipo = "void";
        $$.dim = -1;
-       }*/
+       }
 | STRUCT LKEY decl RKEY {
   $$.tipo = "struct";
   $$.dim = -1;
@@ -132,7 +136,7 @@ idlist: idlist COMMA ID  tipoarreglo{
 	       strcpy(sym.id, $3);
 	       sym.dir = dir;
 	       sym.type = $4.tipo;
-	       sym.var = 0;
+	       sym.var = NULL;
 	       insert(sym);
 	       dir+= $4.dim;
 	     }else{
@@ -141,12 +145,12 @@ idlist: idlist COMMA ID  tipoarreglo{
            } PYC ;
 | ID  tipoarreglo{
 	   if(existe($1)==-1){
-	     printf("insertando %s\n",$1);
+	     printf("insertando %s \n",$1);	     
 	     symbol sym;
 	     strcpy(sym.id, $1);
 	     sym.dir = dir;
 	     sym.type = $2.tipo;
-	     sym.var = 0;
+	     sym.var = NULL;
 	     insert(sym);
 	     dir += $2.dim;
 	   }else{
@@ -165,12 +169,116 @@ tipoarreglo: LBRACK NUM RBRACK tipoarreglo{
   $$.dim = dimGlobal;
   };
 
-function: VOID MAIN {gen_code("label","","","main");} LPAR RPAR LKEY block {
+
+
+
+/* VOID MAIN {gen_code("label","","","main");} LPAR RPAR LKEY block {
             siginst = gen_code("label","","","end");
             backpatch($7.lnext, siginst);
-     } RKEY;
-        
-       
+     } RKEY
+     | */
+function: FUNC tipo ID {
+              if(existe($3) != -1){
+                  yyerror("Identificador duplicado");
+              }else{
+                  /* generate new symbols table */                  
+                  symbols_table sym_tab;
+                  sym_tab.next = 0;
+                  pushST(sym_tab);
+		  /* store the current dir (the method must be different for structs) */
+		  dirTemp = dir;
+		  dir = 0;		  
+                  /* generate label of function */
+                  gen_code("label","","",$3); 
+              }
+} LPAR paramlistdef RPAR LKEY decl block RKEY{
+//Here the tipe of block and tipo must be the same, but for now block doesnt have type, begin that if here
+char* endLabel = (char*)malloc(100 * sizeof(char));
+    sprintf(endLabel,"%s end",$3);
+    siginst = gen_code("label","","",endLabel);
+    backpatch($10.lnext, siginst);
+//end if here
+    /* destroy sym table */
+    popST();
+    /* restore the previous dir */
+    dir = dirTemp;
+    /* insert id of function */
+    printf("insertando %s\n",$3);
+    symbol sym;
+    strcpy(sym.id, $3);
+    sym.dir = -1;
+    sym.type = $2.tipo;
+    sym.var =  "func";
+    sym.listLength = $6.listaTam;
+    sym.list = $6.lista;
+    insert(sym);
+} function
+| {
+
+  };
+
+paramlistdef: paramlist {
+  $$ = $1;
+}
+| {
+  $$.listaTam = 0;
+};
+
+paramlist: paramlist {
+
+  } COMMA tipo{
+            tipoGlobal = $4.tipo;
+	    dimGlobal  = $4.dim;	    
+	   }ID arrayparam{
+             if(existe($6) != -1){
+                 yyerror("Identificador duplicado");
+	     }
+	     printf("insertando %s\n",$6);
+	     symbol sym;
+	     strcpy(sym.id, $6);
+	     sym.dir = dir;
+	     sym.type = $7.tipo;
+	     sym.var = "param";
+	     insert(sym);
+	     dir = dir + $7.dim;
+	     addParam($$.lista,$7.tipo);
+	     $$.listaTam = $$.listaTam + 1;
+	     }
+| tipo{
+  tipoGlobal = $1.tipo;
+  dimGlobal  = $1.dim;
+  }ID arrayparam{
+	    if(existe($3) != -1)
+	      yyerror("Identificador duplicado");
+	    printf("insertando %s\n",$3);
+	    symbol sym;
+	    strcpy(sym.id, $3);
+	    sym.dir = dir;
+	    sym.type = $4.tipo;
+	    sym.var = "param";
+	    insert(sym);
+	    dir = dir + $4.dim;
+	    /* $$.lista = newLista() */
+	    NodeParam nuevo;
+	    nuevo.data = $4.tipo;
+	    nuevo.next = NULL;
+	    $$.lista = nuevo;
+	    $$.listaTam = 1;
+ 
+	  };
+
+arrayparam: LBRACK NUM RBRACK arrayparam{
+  $$.tipo = getArrayType($2, $4.tipo);
+  $$.dim = $2 * $4.dim;
+  }
+| {
+  if(dimGlobal == -1)
+    yyerror("Tipo inválido para un arreglo");
+  $$.tipo = tipoGlobal;
+  $$.dim = dimGlobal;
+	  };
+
+
 block:  sents {
             $$= $1;
         } 
@@ -321,7 +429,9 @@ expresion identificador(char *s){
         e.first=-1;
         strcpy(e.dir, s);
     }else{
-        yyerror("El identificador no ha sido declarado");
+      print_table();
+      printf("%s",s);
+      yyerror("El identificador no ha sido declarado");
     }
     return e;
 }

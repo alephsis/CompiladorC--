@@ -39,6 +39,7 @@
 #if YYDEBUG
 extern int yydebug;
 #endif
+
 #include "attribs.h"
 #include "intermediate_code.c"
 #include "symbols.c"
@@ -51,49 +52,48 @@ extern int yydebug;
     ID = 258,
     NUM = 259,
     INT = 260,
-    MAIN = 261,
-    PRINT = 262,
-    VOID = 263,
-    IF = 264,
-    WHILE = 265,
-    BREAK = 266,
-    PYC = 267,
-    LKEY = 268,
-    RKEY = 269,
-    TRUE = 270,
-    FALSE = 271,
-    FLOAT = 272,
-    DOUBLE = 273,
-    CHAR = 274,
-    SWITCH = 275,
-    FOR = 276,
-    FUNC = 277,
-    DEFAULT = 278,
-    RETURN = 279,
-    STRUCT = 280,
-    RLC = 281,
-    LLC = 282,
-    SC = 283,
-    COMMA = 284,
-    LBRACK = 285,
-    RBRACK = 286,
-    GTE = 287,
-    LTE = 288,
-    ASIG = 289,
-    OR = 290,
-    AND = 291,
-    EQUAL = 292,
-    NE = 293,
-    GT = 294,
-    LT = 295,
-    ADD = 296,
-    SUB = 297,
-    MUL = 298,
-    DIV = 299,
-    RPAR = 300,
-    LPAR = 301,
-    IFX = 302,
-    ELSE = 303
+    PRINT = 261,
+    VOID = 262,
+    IF = 263,
+    WHILE = 264,
+    BREAK = 265,
+    PYC = 266,
+    LKEY = 267,
+    RKEY = 268,
+    TRUE = 269,
+    FALSE = 270,
+    FLOAT = 271,
+    DOUBLE = 272,
+    CHAR = 273,
+    SWITCH = 274,
+    FOR = 275,
+    FUNC = 276,
+    DEFAULT = 277,
+    RETURN = 278,
+    STRUCT = 279,
+    RLC = 280,
+    LLC = 281,
+    SC = 282,
+    COMMA = 283,
+    LBRACK = 284,
+    RBRACK = 285,
+    GTE = 286,
+    LTE = 287,
+    ASIG = 288,
+    OR = 289,
+    AND = 290,
+    EQUAL = 291,
+    NE = 292,
+    GT = 293,
+    LT = 294,
+    ADD = 295,
+    SUB = 296,
+    MUL = 297,
+    DIV = 298,
+    RPAR = 299,
+    LPAR = 300,
+    IFX = 301,
+    ELSE = 302
   };
 #endif
 
@@ -102,7 +102,7 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 34 "semantic.y" /* yacc.c:1909  */
+#line 37 "semantic.y" /* yacc.c:1909  */
 
     char sval[32];
     char ssval[3];
@@ -113,10 +113,10 @@ union YYSTYPE
     int line;
     type tval;
     arrayType arrtval;
-    ListParam listsval;
+
  
 
-#line 117 "semantic.tab.h" /* yacc.c:1909  */
+#line 116 "semantic.tab.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;

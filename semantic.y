@@ -17,9 +17,12 @@ int temporales;
 int siginst;
 char* tipoGlobal;
 int dimGlobal;
+NodeParam globalList;
+int globalListLength;
  
 void init();
 int existe(char *id);
+int existeLocal(char *id);
 expresion operacion(expresion e1, expresion e2, char *op);
 expresion numero(int n);
 expresion identificador(char *s);
@@ -41,12 +44,12 @@ char* getArrayType(int n, char* t);
     int line;
     type tval;
     arrayType arrtval;
-    ListParam listsval;
+
  }
 
 %token <sval> ID
 %token <nval> NUM
-%token INT MAIN PRINT VOID
+%token INT PRINT VOID
 %token IF WHILE BREAK 
 %token PYC
 %token LKEY RKEY
@@ -81,7 +84,6 @@ char* getArrayType(int n, char* t);
 %type<cval> cond;
 %type<tval> tipo idlist;
 %type<arrtval> tipoarreglo arrayparam;
-%type<listsval> paramlist paramlistdef
 %type<stval> sents sent block goto_else
 %type<ssval> rel
 
@@ -100,8 +102,7 @@ program : {init();}
 decl: tipo{      
       tipoGlobal = $1.tipo;
       dimGlobal  = $1.dim;
-} idlist
-| decl decl
+} idlist PYC
 | ;
 
 tipo: INT {
@@ -130,7 +131,7 @@ tipo: INT {
 	  } ;
 
 idlist: idlist COMMA ID  tipoarreglo{
-	     if(existe($3)==-1){
+	     if(existeLocal($3)==-1){
 	       printf("insertando %s\n",$3);
 	       symbol sym;
 	       strcpy(sym.id, $3);
@@ -142,9 +143,9 @@ idlist: idlist COMMA ID  tipoarreglo{
 	     }else{
 	       yyerror("Identificador duplicado");
 	     }
-           } PYC ;
+           } 
 | ID  tipoarreglo{
-	   if(existe($1)==-1){
+	   if(existeLocal($1)==-1){	     
 	     printf("insertando %s \n",$1);	     
 	     symbol sym;
 	     strcpy(sym.id, $1);
@@ -153,45 +154,42 @@ idlist: idlist COMMA ID  tipoarreglo{
 	     sym.var = NULL;
 	     insert(sym);
 	     dir += $2.dim;
-	   }else{
+	   }else{	     
 	     yyerror("Identificador duplicado");
 	   }	    
-} PYC ;
+} ;
 
 tipoarreglo: LBRACK NUM RBRACK tipoarreglo{
+  if(dimGlobal == -1)
+    yyerror("Tipo invalido para un arreglo");
   $$.tipo = getArrayType($2, $4.tipo);
   $$.dim = $2 * $4.dim;
   }
 | {
-  if(dimGlobal == -1)
-    yyerror("Tipo inválido para un arreglo");
+  if(strcmp("void",tipoGlobal) == 0)
+    yyerror("Tipo void válido solo a funciones");
   $$.tipo = tipoGlobal;
   $$.dim = dimGlobal;
   };
 
 
-
-
-/* VOID MAIN {gen_code("label","","","main");} LPAR RPAR LKEY block {
-            siginst = gen_code("label","","","end");
-            backpatch($7.lnext, siginst);
-     } RKEY
-     | */
 function: FUNC tipo ID {
               if(existe($3) != -1){
                   yyerror("Identificador duplicado");
               }else{
                   /* generate new symbols table */                  
-                  symbols_table sym_tab;
-                  sym_tab.next = 0;
-                  pushST(sym_tab);
+                  symbols_table* sym_tab;
+		  
+		  sym_tab  = (symbols_table *)malloc(1000*sizeof(symbol)+5);
+                  sym_tab->next = 0;
+                  pushST(*sym_tab);
 		  /* store the current dir (the method must be different for structs) */
 		  dirTemp = dir;
 		  dir = 0;		  
                   /* generate label of function */
                   gen_code("label","","",$3); 
               }
-} LPAR paramlistdef RPAR LKEY decl block RKEY{
+	  } LPAR paramlistdef RPAR LKEY decl block RKEY{
 //Here the tipe of block and tipo must be the same, but for now block doesnt have type, begin that if here
 char* endLabel = (char*)malloc(100 * sizeof(char));
     sprintf(endLabel,"%s end",$3);
@@ -209,8 +207,8 @@ char* endLabel = (char*)malloc(100 * sizeof(char));
     sym.dir = -1;
     sym.type = $2.tipo;
     sym.var =  "func";
-    sym.listLength = $6.listaTam;
-    sym.list = $6.lista;
+    sym.listLength = globalListLength;
+    sym.list = globalList;
     insert(sym);
 } function
 | {
@@ -218,10 +216,9 @@ char* endLabel = (char*)malloc(100 * sizeof(char));
   };
 
 paramlistdef: paramlist {
-  $$ = $1;
 }
 | {
-  $$.listaTam = 0;
+  globalListLength = 0;
 };
 
 paramlist: paramlist {
@@ -230,7 +227,7 @@ paramlist: paramlist {
             tipoGlobal = $4.tipo;
 	    dimGlobal  = $4.dim;	    
 	   }ID arrayparam{
-             if(existe($6) != -1){
+             if(existeLocal($6) != -1){
                  yyerror("Identificador duplicado");
 	     }
 	     printf("insertando %s\n",$6);
@@ -241,14 +238,16 @@ paramlist: paramlist {
 	     sym.var = "param";
 	     insert(sym);
 	     dir = dir + $7.dim;
-	     addParam($$.lista,$7.tipo);
-	     $$.listaTam = $$.listaTam + 1;
+	     addParam(globalList,$7.tipo);
+	     globalListLength++;
 	     }
 | tipo{
+  if(strcmp($1.tipo, "void") == 0)
+    yyerror("Tipo void inválido para un parámetro de función");
   tipoGlobal = $1.tipo;
   dimGlobal  = $1.dim;
   }ID arrayparam{
-	    if(existe($3) != -1)
+	    if(existeLocal($3) != -1)
 	      yyerror("Identificador duplicado");
 	    printf("insertando %s\n",$3);
 	    symbol sym;
@@ -262,8 +261,8 @@ paramlist: paramlist {
 	    NodeParam nuevo;
 	    nuevo.data = $4.tipo;
 	    nuevo.next = NULL;
-	    $$.lista = nuevo;
-	    $$.listaTam = 1;
+	    globalList = nuevo;
+	    globalListLength = 1;
  
 	  };
 
@@ -392,6 +391,11 @@ void init(){
 int existe(char *id){
     return search(id);
 }
+
+int existeLocal(char *id){
+    return searchLocal(id);
+}
+
 
 expresion operacion(expresion e1, expresion e2, char *op){
     temporales++;

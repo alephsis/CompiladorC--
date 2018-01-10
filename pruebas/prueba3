@@ -1,6 +1,5 @@
-int a;
-int b;
-int c;
+int a,b;
+
 func void f1(){
     if(a < 3){
         a= 3+5;

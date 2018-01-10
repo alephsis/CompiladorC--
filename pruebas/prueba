@@ -1,13 +1,9 @@
-int a;
+int b;
 
-func void f1(){
-    int z;		
-    if(a < 3){
-        a= 3+5;
-    }
-}
+func void f1(double x){
 
-func void f2(){
-     int b;
-       a = 8 + 1;
+int b,c,d;
+
+b = c + d;
+
 }

@@ -1,10 +1,9 @@
-double a[2][9];
-float  b[5][5];
+double a,b;
 
-void main(){
+func void main(){
     if(a < 3){
         a= 3+5;
-        if( a== 8){
+        if( a == 8){
             a = 5;
         }
         a= a-1;

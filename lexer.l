@@ -28,11 +28,6 @@ int {
         return INT;
     }
 
-main { 
-        yylval.line = yylineno;
-        return MAIN;
-    }
-
 void { 
         yylval.line = yylineno;
         return VOID;

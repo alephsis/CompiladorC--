@@ -31,18 +31,14 @@ struct Node {
     Node *next;
 };
 
-typedef struct ListParam ListParam;
-struct ListParam {
-    NodeParam lista;
-  int listaTam;
-};
-
 
 Node STACK_TOP;
 
 void init_table();
 
 int search(char *id);
+
+int searchLocal(char *id);
 
 int insert(symbol sym);
 
@@ -61,6 +57,8 @@ int set_dir(char *id, int dir);
 int set_var(char *id, char* var);
 
 void print_table();
+
+void print_table2(symbols_table tab);
 
 void pushST(symbols_table elem);
 

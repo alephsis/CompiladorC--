@@ -3,7 +3,6 @@
 #include <string.h>
 
 
-
 void init_table(){ /* this sould be called init_stack xD */
     Node STACK_TOP;
     symbols_table sym_table;
@@ -16,7 +15,7 @@ void init_table(){ /* this sould be called init_stack xD */
 int search(char *id){
   Node* actual = &STACK_TOP;
   while(actual != NULL){
-    for(int i = 0; i <= actual->data.next; i++){
+    for(int i = 0; i < actual->data.next; i++){
       if(strcmp(id, actual->data.syms[i].id)==0){
 	return i;
       }
@@ -26,9 +25,20 @@ int search(char *id){
     return -1;
 }
 
-int insert(symbol sym){
-    int pos = search(sym.id);
+int searchLocal(char *id){
+
+    for(int i = 0; i < STACK_TOP.data.next; i++){
+      if(strcmp(id, STACK_TOP.data.syms[i].id)==0){
+	return i;
+      }
+    }
+    return -1;
     
+}
+
+
+int insert(symbol sym){
+    int pos = searchLocal(sym.id);
     if(STACK_TOP.data.next<1000 && pos ==-1){        
         STACK_TOP.data.syms[STACK_TOP.data.next] = sym;
         STACK_TOP.data.next++;
@@ -39,7 +49,7 @@ int insert(symbol sym){
     
 
 char* get_type(char *id){
-    int pos = search(id);
+    int pos = searchLocal(id);
     if(pos != -1){
         return STACK_TOP.data.syms[pos].type;
     }
@@ -47,7 +57,7 @@ char* get_type(char *id){
 }
 
 int get_dir(char *id){
-    int pos = search(id);
+    int pos = searchLocal(id);
     if(pos != -1){
         return STACK_TOP.data.syms[pos].dir;
     }
@@ -55,7 +65,7 @@ int get_dir(char *id){
 }
 
 char* get_var(char *id){
-    int pos = search(id);
+    int pos = searchLocal(id);
     if(pos != -1){
         return STACK_TOP.data.syms[pos].var;
     }
@@ -64,7 +74,7 @@ char* get_var(char *id){
 
 
 int set_type(char *id, char* type){
-    int pos = search(id);
+    int pos = searchLocal(id);
     if(pos != -1){
         STACK_TOP.data.syms[pos].type = type;
         return pos;
@@ -72,7 +82,7 @@ int set_type(char *id, char* type){
     return -1;
 }
 int set_dir(char *id, int dir){
-    int pos = search(id);
+    int pos = searchLocal(id);
     if(pos != -1){
         STACK_TOP.data.syms[pos].dir= dir;
         return pos;
@@ -81,7 +91,7 @@ int set_dir(char *id, int dir){
 }
 
 int set_var(char *id, char* var){
-    int pos = search(id);
+    int pos = searchLocal(id);
     if(pos != -1){
         STACK_TOP.data.syms[pos].var = var;
         return pos;
@@ -98,6 +108,14 @@ void print_table(){
     }
 }
 
+void print_table2(symbols_table tab){
+  printf("*** TABLA DE SIMBOLOS ***\n");
+    printf("pos\tid\ttipo\tdir\tvar\n");
+    for(int i = 0; i<tab.next; i++){
+        printf("%d\t%s\t%s\t%d\t%s\n",i,tab.syms[i].id, tab.syms[i].type, tab.syms[i].dir, tab.syms[i].var);
+    }
+}
+
 void pushST(symbols_table elem){
   Node temp;
   temp.data = STACK_TOP.data;
@@ -107,9 +125,13 @@ void pushST(symbols_table elem){
 }
 
 symbols_table popST(){
-    symbols_table ret = STACK_TOP.data;
-    STACK_TOP = *(STACK_TOP.next);
-    return ret;
+  symbols_table ret = STACK_TOP.data;
+  Node temp;
+  temp.data = STACK_TOP.next->data;
+  temp.next = STACK_TOP.next->next;
+  STACK_TOP = temp;
+  return ret;
+  
 }
 
 /* Añade un nuevo elemento(tipo) a una lista de parametros */

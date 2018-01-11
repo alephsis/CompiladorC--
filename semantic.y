@@ -23,15 +23,25 @@ int globalListLength;
 void init();
 int existe(char *id);
 int existeLocal(char *id);
+int getSize (char* s);
+int isNumber(char* t);
+int isInt(char* t);
+int isFloat(char* t);
+char* tipoCorrecto (char* t1 ,char* t2, char*op);
 expresion operacion(expresion e1, expresion e2, char *op);
 expresion numero(int n);
 expresion identificador(char *s);
+expresion numeroReal(float n);
+expresion character(char c);
+expresion string(char* s);
+expresion llamada(char* id);
 condition relacional(expresion e1, expresion e2, char *oprel);
 condition and(condition c1, condition c2);
 condition or(condition c1, condition c2);
 void newLabel(char *s);
 char* getArrayType(int n, char* t);
-
+int npEquals(NodeParam* n1,NodeParam* n2);
+ 
 %}
 
 %union{
@@ -41,20 +51,25 @@ char* getArrayType(int n, char* t);
     condition cval;  
     sentence stval;
     int nval;
+    float fval;
     int line;
     type tval;
     arrayType arrtval;
-
+    char charval;
+    NodeParam paramlistval;
  }
 
-%token <sval> ID
+%token <sval> ID STRING
+%token <charval> CHARACTER
 %token <nval> NUM
+%token <fval> NUMR
+%token <ssval> NOT
 %token INT PRINT VOID
 %token IF WHILE BREAK 
 %token PYC
 %token LKEY RKEY
 %token TRUE FALSE
-%token FLOAT DOUBLE CHAR
+%token FLOAT CHAR
 %token SWITCH
 %token FOR
 %token FUNC
@@ -74,19 +89,19 @@ char* getArrayType(int n, char* t);
 %left AND
 %left<ssval> EQUAL NE
 %left<ssval> GT LT
-%left<ssval> ADD SUB
+%left<ssval> ADD SUB MOD
 %left<ssval> MUL DIV
 %nonassoc RPAR LPAR
 %left IFX
 %left ELSE
 
-%type<eval> exp;
+%type<eval> exp identificadores;
 %type<cval> cond;
 %type<tval> tipo idlist;
 %type<arrtval> tipoarreglo arrayparam;
 %type<stval> sents sent block goto_else
 %type<ssval> rel
-
+%type<paramlistval> parampasslist 
 
 
 %start program
@@ -113,10 +128,6 @@ tipo: INT {
        $$.tipo = "float";
        $$.dim = 4;
 	  }
-| DOUBLE  {
-       $$.tipo = "double";
-       $$.dim = 8;
-  }
 | CHAR  {
        $$.tipo = "char";
        $$.dim = 1;
@@ -137,7 +148,7 @@ idlist: idlist COMMA ID  tipoarreglo{
 	       strcpy(sym.id, $3);
 	       sym.dir = dir;
 	       sym.type = $4.tipo;
-	       sym.var = NULL;
+	       sym.var = "variable";
 	       insert(sym);
 	       dir+= $4.dim;
 	     }else{
@@ -151,7 +162,7 @@ idlist: idlist COMMA ID  tipoarreglo{
 	     strcpy(sym.id, $1);
 	     sym.dir = dir;
 	     sym.type = $2.tipo;
-	     sym.var = NULL;
+	     sym.var = "variable";
 	     insert(sym);
 	     dir += $2.dim;
 	   }else{	     
@@ -238,7 +249,7 @@ paramlist: paramlist {
 	     sym.var = "param";
 	     insert(sym);
 	     dir = dir + $7.dim;
-	     addParam(globalList,$7.tipo);
+	     addParam(&globalList,$7.tipo);
 	     globalListLength++;
 	     }
 | tipo{
@@ -258,10 +269,11 @@ paramlist: paramlist {
 	    insert(sym);
 	    dir = dir + $4.dim;
 	    /* $$.lista = newLista() */
-	    NodeParam nuevo;
-	    nuevo.data = $4.tipo;
-	    nuevo.next = NULL;
-	    globalList = nuevo;
+	    NodeParam* nuevo;
+	    nuevo = (NodeParam *)malloc(sizeof(NodeParam));
+	    nuevo->data = $4.tipo;
+	    nuevo->next = NULL;
+	    globalList = *nuevo;
 	    globalListLength = 1;
  
 	  };
@@ -301,6 +313,11 @@ sent:   ID {
             }
         }        
         ASIG exp PYC{
+	  if(strcmp($4.type,get_type($1)) != 0){
+	    char err[100];
+	    sprintf(err,"Tipos incompatibles en asignación, se esperaba %s pero se obtuvo %s",get_type($1),$4.type);
+	    yyerror(err);
+	  }
                 siginst = gen_code("=", $4.dir, "", $1);               
                 if($4.first != -1)
                     $$.first = $4.first;
@@ -365,12 +382,42 @@ exp :  exp ADD exp { $$ = operacion($1, $3,$2);}
         | exp SUB exp { $$ = operacion($1, $3,$2);}
         | exp MUL exp { $$ = operacion($1, $3,$2);}
         | exp DIV exp { $$ = operacion($1, $3,$2);}
+        | exp MOD exp { $$ = operacion($1, $3,$2);}
         | NUM {$$= numero($1);}
-        | ID{$$= identificador($1);}
-        | LPAR exp RPAR {$$ = $2;};
-        
+        | NUMR {$$= numeroReal($1);}
+        | CHARACTER {$$= character($1);}
+        | STRING {$$= string($1);}
+        | LPAR exp RPAR {$$ = $2;}
+        | ID {
+	  if(existe($1) == -1)
+	    yyerror("Identificador no ha sido declarado");
+	  if(isFunction($1) == NULL)
+	    yyerror("El identificador no es una función");
+	  } LPAR parampasslist RPAR{
+	    if(!npEquals(&$4,get_list($1)))
+	      yyerror("El tipo y número de argumentos no coincide");
+	    $$ = llamada($1);
+	} 
+	| identificadores{$$ = $1;};
 
-        
+parampasslist: parampasslist{
+
+	} COMMA exp{
+	  siginst = gen_code("param", $4.dir, "", "");
+	  addParam(&$$,$4.type);
+	}
+| exp{
+  
+  siginst = gen_code("param", $1.dir, "", "");
+  NodeParam* nuevo;
+  nuevo = (NodeParam*)malloc(sizeof(NodeParam));
+  nuevo->data = $1.type;
+  nuevo->next = NULL;
+  $$ = *nuevo;
+  };
+
+identificadores: ID{$$ = identificador($1);};
+
 %%
 
 void yyerror(char* s){
@@ -398,46 +445,148 @@ int existeLocal(char *id){
 
 
 expresion operacion(expresion e1, expresion e2, char *op){
-    temporales++;
-    expresion e;
-    
-    char num[5];
-    sprintf(num,"%d",temporales);
-    strcpy(e.dir, "t");
-    strcat(e.dir, num);    
-    e.type = 1;
-    siginst = gen_code(op, e1.dir, e2.dir, e.dir);
-    if(e1.first != -1){
-        e.first = e1.first;
+  temporales++;
+  expresion e;    
+  char num[5];
+  sprintf(num,"%d",temporales);
+  strcpy(e.dir, "t");
+  strcat(e.dir, num);    
+  e.type = tipoCorrecto(e1.type ,e2.type ,op);
+  siginst = gen_code(op, e1.dir, e2.dir, e.dir);
+  if(e1.first != -1){
+    e.first = e1.first;
+  }else{
+    if(e2.first!=-1){
+      e.first = e2.first;
     }else{
-        if(e2.first!=-1){
-            e.first = e2.first;
-        }else{
-            e.first = siginst;
-        }        
-    }
-    
-    return e;
+      e.first = siginst;
+    }        
+  }
+  return e;  
+}
+
+/* regresa el tipo de la expresion resultante de una operacion
+ según los tipos de los operadores */
+
+char* tipoCorrecto (char* t1 ,char* t2, char*op){
+  if(strcmp(op,"+") == 0 ||
+     strcmp(op,"-") == 0 ||
+     strcmp(op,"*") == 0  ){
+    if(!isNumber(t1) || !isNumber(t2))
+      yyerror("operadores deben ser numéricos");
+    if(isFloat(t1) || isFloat(t2))
+      return "float";
+    else
+      return "int";
+  }else if(strcmp(op,"/") == 0){
+    if(!isNumber(t1) || !isNumber(t2))
+      yyerror("operadores deben ser numéricos");
+    return "float";
+  }else if(strcmp(op,"%") == 0){
+    if(!isInt(t1) || !isInt(t2))
+      yyerror("El módulo debe ser entre dos enteros");
+    return "int";
+  }else{
+    return NULL;
+  }
+}
+
+/* regresa 1 si el tipo es int o float,0 en otro caso */
+
+int isNumber(char* t){
+  if(strcmp(t,"int") == 0)
+    return 1;
+  if(strcmp(t,"float") == 0)
+    return 1;
+  return 0;
+}
+
+/* regresa 1 si el tipo es int ,0 en otro caso */
+
+int isInt(char* t){
+  if(strcmp(t,"int") == 0)
+    return 1;
+  return 0;
+}
+
+/* regresa 1 si el tipo es float, 0 en otro caso */
+
+int isFloat(char* t){
+  if(strcmp(t,"float") == 0)
+    return 1;
+  return 0;
 }
 
 expresion numero(int n){
     expresion e;
     sprintf(e.dir, "%d", n);
     e.first=-1;
+    e.type = "int";
     return e;    
+    }
+
+expresion numeroReal(float n){
+    expresion e;
+    sprintf(e.dir, "%.3f", n);
+    e.first=-1;
+    e.type = "float";
+    return e;    
+    }
+
+expresion character(char c){
+    expresion e;
+    sprintf(e.dir, "%c", c);
+    e.first=-1;
+    e.type = "char";
+    return e;    
+    }
+
+expresion string(char* s){
+    expresion e;
+    sprintf(e.dir, "%s", s);
+    e.first=-1;
+    char* t = (char*)malloc(50*sizeof(char));
+    t = getArrayType(getSize(s),"char");
+    e.type = t;
+    return e;    
+    }
+
+expresion llamada(char* id){
+  symbol* fun = isFunction(id);
+  //asignar a e.dir una nueva variable temporal
+  temporales++;
+  expresion e;    
+  char num[5];
+  sprintf(num,"%d",temporales);
+  strcpy(e.dir, "t");
+  strcat(e.dir, num);
+  //generar la llamada y construir la expresion
+  char len[5];
+  sprintf(len,"%d",fun->listLength);
+  siginst = gen_code("call", id, len , e.dir);
+  e.type = fun->type;
+  e.first = -1;
+  return e;  
+}
+
+int getSize (char* s){
+  int i = 0;
+  while(*(s+i) != '\0')
+    i++;  
+  return i;
 }
 
 expresion identificador(char *s){
-    expresion e;
-    if(existe(s)!=-1){        
-        e.first=-1;
-        strcpy(e.dir, s);
-    }else{
-      print_table();
-      printf("%s",s);
-      yyerror("El identificador no ha sido declarado");
-    }
-    return e;
+  expresion* e = (expresion*)malloc(sizeof(expresion));
+  char* t = get_type(s);
+  if(t != NULL){
+    e->first=-1;
+    strcpy(e->dir, s);
+    e->type = t;
+  }else{
+    yyerror("El identificador no ha sido declarado");
+  }
+  return *e;
 }
 
 condition relacional(expresion e1, expresion e2, char *oprel){
@@ -490,6 +639,21 @@ int main(int argc, char** argv){
         fclose(yyin);
     }
 }
+
+int npEquals(NodeParam* n1,NodeParam* n2){
+  NodeParam* actual1 = n1;
+  NodeParam* actual2 = n2;
+  while(actual1 != NULL && actual2 != NULL){
+    if(strcmp(actual1->data,actual2->data) != 0)
+      return 0;
+    actual1 = actual1->next;
+    actual2 = actual2->next;
+  }
+  if(actual1 == NULL && actual2 == NULL)
+    return 1;
+  return 0;
+}
+
 /*
 #include "attribs.h"
 #include "intermediate_code.c"

@@ -42,13 +42,17 @@ int searchLocal(char *id);
 
 int insert(symbol sym);
 
-void addParam(NodeParam lista, char* data);
+void addParam(NodeParam* lista, char* data);
+
+symbol* isFunction(char *id);
 
 char* get_type(char *id);
 
 int get_dir(char *id);
 
 char* get_var(char *id);
+
+NodeParam* get_list(char *id);
 
 int set_type(char *id, char* type);
 

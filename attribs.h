@@ -4,12 +4,10 @@
 #include "intermediate_code.h"
 
 typedef struct _expresion{
-    char dir[10];
-    int type;
+    char dir[1000];
+    char* type;
     int first;
 } expresion;
-
-
 
 typedef struct _condition{
     label ltrue;

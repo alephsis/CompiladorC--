@@ -1,9 +1,11 @@
 int b;
 
-func void f1(double x){
+func char f1(char c,char d[8] ){
 
-int b,c,d;
+c = 'A';
 
-b = c + d;
+}
 
+func void f2(char a){
+  b = f1(f1('L',"jejejeje"),"holahola");
 }

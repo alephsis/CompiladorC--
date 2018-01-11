@@ -39,7 +39,6 @@
 #if YYDEBUG
 extern int yydebug;
 #endif
-
 #include "attribs.h"
 #include "intermediate_code.c"
 #include "symbols.c"
@@ -50,50 +49,54 @@ extern int yydebug;
   enum yytokentype
   {
     ID = 258,
-    NUM = 259,
-    INT = 260,
-    PRINT = 261,
-    VOID = 262,
-    IF = 263,
-    WHILE = 264,
-    BREAK = 265,
-    PYC = 266,
-    LKEY = 267,
-    RKEY = 268,
-    TRUE = 269,
-    FALSE = 270,
-    FLOAT = 271,
-    DOUBLE = 272,
-    CHAR = 273,
-    SWITCH = 274,
-    FOR = 275,
-    FUNC = 276,
-    DEFAULT = 277,
-    RETURN = 278,
-    STRUCT = 279,
-    RLC = 280,
-    LLC = 281,
-    SC = 282,
-    COMMA = 283,
-    LBRACK = 284,
-    RBRACK = 285,
-    GTE = 286,
-    LTE = 287,
-    ASIG = 288,
-    OR = 289,
-    AND = 290,
-    EQUAL = 291,
-    NE = 292,
-    GT = 293,
-    LT = 294,
-    ADD = 295,
-    SUB = 296,
-    MUL = 297,
-    DIV = 298,
-    RPAR = 299,
-    LPAR = 300,
-    IFX = 301,
-    ELSE = 302
+    STRING = 259,
+    CHARACTER = 260,
+    NUM = 261,
+    NUMR = 262,
+    NOT = 263,
+    INT = 264,
+    PRINT = 265,
+    VOID = 266,
+    IF = 267,
+    WHILE = 268,
+    BREAK = 269,
+    PYC = 270,
+    LKEY = 271,
+    RKEY = 272,
+    TRUE = 273,
+    FALSE = 274,
+    FLOAT = 275,
+    CHAR = 276,
+    SWITCH = 277,
+    FOR = 278,
+    FUNC = 279,
+    DEFAULT = 280,
+    RETURN = 281,
+    STRUCT = 282,
+    RLC = 283,
+    LLC = 284,
+    SC = 285,
+    COMMA = 286,
+    LBRACK = 287,
+    RBRACK = 288,
+    GTE = 289,
+    LTE = 290,
+    ASIG = 291,
+    OR = 292,
+    AND = 293,
+    EQUAL = 294,
+    NE = 295,
+    GT = 296,
+    LT = 297,
+    ADD = 298,
+    SUB = 299,
+    MOD = 300,
+    MUL = 301,
+    DIV = 302,
+    RPAR = 303,
+    LPAR = 304,
+    IFX = 305,
+    ELSE = 306
   };
 #endif
 
@@ -102,7 +105,7 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 37 "semantic.y" /* yacc.c:1909  */
+#line 47 "semantic.y" /* yacc.c:1909  */
 
     char sval[32];
     char ssval[3];
@@ -110,13 +113,15 @@ union YYSTYPE
     condition cval;  
     sentence stval;
     int nval;
+    float fval;
     int line;
     type tval;
     arrayType arrtval;
-
+    char charval;
+    NodeParam paramlistval;
  
 
-#line 116 "semantic.tab.h" /* yacc.c:1909  */
+#line 122 "semantic.tab.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;

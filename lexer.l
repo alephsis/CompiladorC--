@@ -8,10 +8,12 @@
 
 
 id [a-zA-Z_][a-zA-Z0-9_]*
-numero [0-9]+(\.[0-9]+)?
+entero (\-)?[0-9]+
+real   (\-)?[0-9]+\.[0-9]+
 espacio [ \t\n]
-caracter[a-zA-Z_]
+caracter \'[^\']\'
 cadena  \"[^\"]*\"
+
 %%
 "," { 
        yylval.line = yylineno;
@@ -72,11 +74,6 @@ break {
         return FLOAT;
     }
 
-"double" { 
-        yylval.line = yylineno;
-        return  DOUBLE;
-    }
-
 "char" { 
         yylval.line = yylineno;
         return  CHAR;
@@ -117,12 +114,55 @@ break {
         return ID;
     }
     
-{numero} {
-            yylval.line = yylineno;
-            yylval.nval = atoi(yytext);
+{entero} {
+            yylval.line = yylineno;            
+            if(*yytext == '-'){
+		yylval.nval = 0 - atoi(yytext+1);
+            }else{
+                yylval.nval = atoi(yytext);
+            }
             return NUM;
         }
-        
+
+{real} {
+            yylval.line = yylineno;            
+            if(*yytext == '-'){
+		yylval.fval = 0 - atof(yytext+1);
+            }else{
+                yylval.fval = atof(yytext);
+            }
+            return NUMR;
+        }
+
+{caracter} {
+        yylval.line = yylineno;
+        char* cad = (char*)malloc(5*sizeof(char));
+        strcpy(cad, yytext);
+        yylval.charval = *(cad + 1);
+        return CHARACTER;      
+}
+
+{cadena} {
+        yylval.line = yylineno;
+
+        //get string size and store it in i
+        int i = 0;
+        while(*(yytext + i) != '\0'){
+            i++;
+        }
+        //if it's the empty string just copy that
+        if(i == 2){
+            strcpy(yylval.sval,"");
+        }else{ 
+        //otherwise cut the quotes and store the string
+            char* cad = (char*)malloc(i*sizeof(char));
+            strcpy(cad,yytext);
+            cad++;
+            *(cad+i-2) = '\0';
+            strcpy(yylval.sval, cad);
+            return STRING;
+        }
+}
 
 "{" { 
         yylval.line = yylineno;
@@ -144,12 +184,6 @@ break {
         return RBRACK;
     }
 
-
-"=" {   
-        yylval.line = yylineno;
-        return ASIG;
-    }
-
 "||" { 
         yylval.line = yylineno;
         return OR;
@@ -165,12 +199,36 @@ break {
         strcpy(yylval.ssval, yytext);
         return EQUAL;
     }
-    
+
+"=" {   
+        yylval.line = yylineno;
+        return ASIG;
+    }
+
 "!=" {  
         yylval.line = yylineno;
         strcpy(yylval.ssval, yytext);
-        return NE;
+        return NE; 
     }
+
+"!" {  
+        yylval.line = yylineno;
+        strcpy(yylval.ssval, yytext);
+        return NOT;
+    }
+
+">=" {   
+        yylval.line = yylineno;
+        strcpy(yylval.ssval, yytext);
+        return GTE;
+    }
+    
+"<=" {   
+        yylval.line = yylineno;
+        strcpy(yylval.ssval, yytext);
+        return LTE;
+     }
+
     
 ">" {   
         yylval.line = yylineno;
@@ -182,20 +240,8 @@ break {
         yylval.line = yylineno;
         strcpy(yylval.ssval, yytext);
         return LT;
-    }
- 
-">=" {   
-        yylval.line = yylineno;
-        strcpy(yylval.ssval, yytext);
-        return GTE;
-    }
-    
-"<=" {   
-        yylval.line = yylineno;
-        strcpy(yylval.ssval, yytext);
-        return LTE;
-    }
-    
+    }    
+
 "+" { 
         yylval.line = yylineno;
         strcpy(yylval.ssval, yytext);
@@ -214,6 +260,12 @@ break {
 "/" {   yylval.line = yylineno;
         strcpy(yylval.ssval, yytext);
         return DIV;}
+
+"%" { 
+        yylval.line = yylineno;
+        strcpy(yylval.ssval, yytext);
+        return MOD;}
+
 
 ")" { 
         yylval.line = yylineno;
@@ -238,7 +290,8 @@ break {
  "//" { 
         yylval.line = yylineno;
         return  SC;
-    }
+      }
+
 {espacio} {}
 
 . { printf("ERROR: %s en la línea %d\n", yytext, yylineno);}

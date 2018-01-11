@@ -1,13 +1,16 @@
-double a,b;
+float a,b;
 
-func void main(){
-    if(a < 3){
-        a= 3+5;
+func void main(int x, char c[4]){
+int z;
+    if(a < -3){
+        a= 3 + 5.2;
+	c="holo";
+	a = -11.25;
         if( a == 8){
-            a = 5;
+            a = 8.5;
         }
-        a= a-1;
+        a = 1 - 2.3;
     }else{
-        a= 2;
+        a = 0.2;
     }
 }

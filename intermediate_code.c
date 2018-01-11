@@ -44,8 +44,8 @@ void backpatch(label l, int inst){
 
 void print_code(){
     printf("*** CODIGO INTERMEDIO ***\n");
-    printf("inst\top\targ1\targ2\tres\n");
+    printf("inst\top\targ1\t\targ2\t\tres\n");
     for(int i=0; i <CODE.i ;i++){
-        printf("%d\t%s\t%s\t%s\t%s\n",i, CODE.items[i].op, CODE.items[i].arg1, CODE.items[i].arg2, CODE.items[i].res);
+        printf("%d\t%s\t%s\t\t%s\t\t%s\n",i, CODE.items[i].op, CODE.items[i].arg1, CODE.items[i].arg2, CODE.items[i].res);
     }
 }

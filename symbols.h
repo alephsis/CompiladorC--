@@ -31,7 +31,6 @@ struct Node {
     Node *next;
 };
 
-
 Node STACK_TOP;
 
 void init_table();

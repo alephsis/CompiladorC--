@@ -10,7 +10,9 @@ func void f1(){
     }else{
         a= 2;
         while(b!=3){
+	    
             b = b + 2;
+            a = 1;
         }
     }
 }

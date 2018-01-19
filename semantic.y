@@ -27,6 +27,8 @@ int getSize (char* s);
 int isNumber(char* t);
 int isInt(char* t);
 int isFloat(char* t);
+int isArray(char* t);
+int isChar(char* t); 
 char* tipoCorrecto (char* t1 ,char* t2, char*op);
 expresion operacion(expresion e1, expresion e2, char *op);
 expresion numero(int n);
@@ -35,12 +37,16 @@ expresion numeroReal(float n);
 expresion character(char c);
 expresion string(char* s);
 expresion llamada(char* id);
+expresion array(arrayUse arrayUse); 
 condition relacional(expresion e1, expresion e2, char *oprel);
 condition and(condition c1, condition c2);
 condition or(condition c1, condition c2);
 void newLabel(char *s);
 char* getArrayType(int n, char* t);
 int npEquals(NodeParam* n1,NodeParam* n2);
+char* newTemp();
+char* getWidth(char*t);
+char* getArrayWidth(char*t);
  
 %}
 
@@ -57,6 +63,7 @@ int npEquals(NodeParam* n1,NodeParam* n2);
     arrayType arrtval;
     char charval;
     NodeParam paramlistval;
+    arrayUse arrayuseval;
  }
 
 %token <sval> ID STRING
@@ -102,7 +109,7 @@ int npEquals(NodeParam* n1,NodeParam* n2);
 %type<stval> sents sent block goto_else
 %type<ssval> rel
 %type<paramlistval> parampasslist 
-
+%type<arrayuseval> arrayuse
 
 %start program
 
@@ -301,26 +308,22 @@ block:  sents {
 sents: sents sent {
             backpatch($1.lnext, $2.first);
             $$.lnext = $2.lnext;
-            $$.first = $1.first;
+	    $$.first = $1.first;
         }
         | sent{
             $$.lnext = $1.lnext;
+	    $$.first = $1.first;
         };
 
-sent:   ID {
-            if(existe($1)==-1){
-                yyerror("el identificador no ha sido declarado");
-            }
-        }        
-        ASIG exp PYC{
-	  if(strcmp($4.type,get_type($1)) != 0){
+sent:   identificadores ASIG exp PYC{
+	  if(strcmp($3.type,$1.type) != 0){
 	    char err[100];
-	    sprintf(err,"Tipos incompatibles en asignación, se esperaba %s pero se obtuvo %s",get_type($1),$4.type);
+	    sprintf(err,"Tipos incompatibles en asignación, se esperaba %s pero se obtuvo %s",$1.type,$3.type);
 	    yyerror(err);
 	  }
-                siginst = gen_code("=", $4.dir, "", $1);               
-                if($4.first != -1)
-                    $$.first = $4.first;
+                siginst = gen_code("=", $3.dir, "", $1.dir);               
+                if($3.first != -1)
+                    $$.first = $3.first;
                 else
                     $$.first = siginst;
         }
@@ -342,20 +345,30 @@ sent:   ID {
             else
                 $$.first = siginst;
         }
-        | WHILE LPAR cond RPAR LKEY block RKEY {                
+        |  WHILE LPAR cond RPAR LKEY block RKEY {                
                 backpatch($6.lnext, $3.first);
                 backpatch($3.ltrue, $6.first);
-                $$.lnext = $3.lfalse;
+		for(int a = 0; a < $6.lnext.i;a++){
+		  printf("lista tiene: %d\n",$6.lnext.items[a]);
+		}
+                $$.lnext = $3.lfalse;		
                 char temp[15];
-                sprintf(temp,"%d", $3.first);
+		sprintf(temp,"%d", $3.first);
                 gen_code("goto", "", "", temp);
         }
         | BREAK PYC {
-            $$.first = -1;
+            $$.first = siginst;
             siginst = gen_code("goto", "", "", "");
             $$.lnext = create_list(siginst);
         };
-    
+
+        | RETURN exp PYC{
+	  gen_code("return",$2.dir,"","");
+	  $$.first = siginst;
+	  siginst = gen_code("goto", "", "", "");
+	  $$.lnext = create_list(siginst);          
+	  };
+
 goto_else : {
                 siginst = gen_code("goto","","", "");             
                 $$.lnext = create_list(siginst);
@@ -416,8 +429,56 @@ parampasslist: parampasslist{
   $$ = *nuevo;
   };
 
-identificadores: ID{$$ = identificador($1);};
+identificadores: ID{$$ = identificador($1);}
+| arrayuse {$$ = array($1);} ;
 
+
+arrayuse: ID {
+  char* type;
+  type = (char* )malloc(1000);
+  type = get_type($1);
+  if(type == NULL){
+    char *err = (char *)malloc(100);
+    sprintf(err,"El id %s no ha sido declarado",$1);
+    yyerror(err);
+  }
+  if(!isArray(type)){
+    char *err = (char *)malloc(100);
+    sprintf(err,"El id %s no corresponde a un arreglo",$1);
+    yyerror(err);
+  }
+	  } LBRACK exp RBRACK{
+	      char* type;
+	      type = (char* )malloc(1000);
+	      type = get_type($1);
+	      $$.array = (char*)malloc(100);
+	      strcpy($$.array,$1);
+	      int digits;
+	      digits = getSize(getArrayWidth(type));
+	      $$.type = type + 17 + digits;
+	      char* temp = newTemp();	      
+	      strcpy($$.dir,temp);
+	      $$.width = getWidth($$.type);
+	      gen_code("*",$4.dir,$$.width,$$.dir);
+	  }
+| arrayuse LBRACK exp RBRACK{
+              char* type;
+	      type = (char* )malloc(1000);
+	      type = $1.type;
+	      $$.array = $1.array;
+
+	      int digits;
+	      digits = getSize(getArrayWidth(type));	      
+	      $$.type = type + 17 + digits;
+
+	      $$.width = getWidth($$.type);
+	      
+	      char* t = newTemp();
+	      char* temp = newTemp();
+	      strcpy($$.dir,temp);	      
+	      gen_code("*",$3.dir,getWidth($$.type),t);
+	      gen_code("+",$1.dir,t,$$.dir);
+	  } ;
 %%
 
 void yyerror(char* s){
@@ -426,7 +487,7 @@ void yyerror(char* s){
 }
 
 void newLabel(char *s){
-    
+  
 }
 
 void init(){
@@ -443,6 +504,15 @@ int existeLocal(char *id){
     return searchLocal(id);
 }
 
+char* newTemp(){
+  temporales++;
+  char num[5];
+  char* ret = (char*)malloc(100);
+  sprintf(num,"%d",temporales);
+  strcpy(ret, "t");
+  strcat(ret, num);
+  return ret;
+}
 
 expresion operacion(expresion e1, expresion e2, char *op){
   temporales++;
@@ -517,6 +587,83 @@ int isFloat(char* t){
   return 0;
 }
 
+/* regresa 1 si el tipo es char, 0 en otro caso */
+
+int isChar(char* t){
+  if(strcmp(t,"char") == 0)
+    return 1;
+  return 0;
+}
+
+/* regresa 1 si el tipo es un arreglo, 0 en otro caso */
+
+int isArray(char* t){
+  if(*t == 'a')
+    return 1;
+  return 0;
+}
+/* regresa el tamaño de un tipo, en caso de ser un arreglo regresa el número de sus registros */
+
+char* getArrayWidth(char *t){
+
+  if(isInt(t))
+    return "4";
+  if(isFloat(t))
+    return "4";
+  if(isChar(t))
+    return "1";
+  if(isArray(t)){
+    int i = 7;
+    int j = 0;
+    char* ret = (char*)malloc(100);
+    while(*(t + i) != ']'){
+      *(ret + j) = *(t + i);
+      i++;
+      j++;
+    }
+    return ret ;
+  }
+  return NULL; 
+}
+
+char* getWidth(char *t){
+  printf("entré con %s\n",t);
+  if(isInt(t))
+    return "4";
+  if(isFloat(t))
+    return "4";
+  if(isChar(t))
+    return "1";
+  if(isArray(t)){
+    int i = 7;
+    int j = 0;
+    char* ret = (char*)malloc(100);
+    while(*(t + i) != ']'){
+      *(ret + j) = *(t + i);
+      i++;
+      j++;
+    }
+
+    int digits;
+    char* type;
+    digits = getSize(ret);	      
+    type = t + 17 + digits;    
+    int size = atoi(getWidth(type)) * atoi(ret);
+    char* trueRet = (char*)malloc(100);
+    sprintf(trueRet,"%d",size);
+    return trueRet ;
+  }
+  return NULL; 
+}
+
+ 
+int getSize (char* s){
+  int i = 0;
+  while(*(s+i) != '\0')
+    i++;  
+  return i;
+}
+
 expresion numero(int n){
     expresion e;
     sprintf(e.dir, "%d", n);
@@ -569,11 +716,17 @@ expresion llamada(char* id){
   return e;  
 }
 
-int getSize (char* s){
-  int i = 0;
-  while(*(s+i) != '\0')
-    i++;  
-  return i;
+expresion array(arrayUse au){
+  expresion* e = (expresion*)malloc(sizeof(expresion));
+  e->type = au.type;
+  e->first = -1;
+  char* offset = au.dir;
+  char* eDir = newTemp();
+  char* arrDir = (char*)malloc(100);
+  sprintf(arrDir,"%s[%s]",au.array,offset);
+  gen_code("=",arrDir,"",eDir);
+  strcpy(e->dir,eDir);
+  return *e;
 }
 
 expresion identificador(char *s){

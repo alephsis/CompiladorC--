@@ -1,11 +1,15 @@
-int b;
+char b;
 
-func char f1(char c,char d[8] ){
-
-c = 'A';
-
+func char f1(char a[10][4] ,int b ){
+    a[10] = "Hola";
+    b = 0;
+    while(b < 10){    
+     b = b + 1;
+    }
+    return 'A';
 }
 
-func void f2(char a){
-  b = f1(f1('L',"jejejeje"),"holahola");
+func float f2(float b){
+b = 12.5;
+return b;
 }

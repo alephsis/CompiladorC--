@@ -41,4 +41,11 @@ typedef struct _arrayType{
 
 } arrayType;
 
+typedef struct _arrayUse{
+  char *array;
+  char* type;
+  char dir[1000];
+  char* width;
+} arrayUse;
+
 #endif

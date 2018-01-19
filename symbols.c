@@ -32,6 +32,9 @@ symbol* isFunction(char *id){
   return NULL;  
 }
 
+/* regresa la lista de tipos del id dado, busca en todas
+   las tablas de símbolos, NULL en otro caso */
+
 NodeParam* get_list(char *id){
  Node* actual = &STACK_TOP;
   while(actual != NULL){

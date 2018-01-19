@@ -33,6 +33,8 @@ typedef struct _type{
   int dim;
 } type;
 
+/* Estructura para manejar los tipos de los arreglos al ser declarados */
+
 typedef struct _arrayType{
   char* tipo;  
   char* baseType;
@@ -40,6 +42,8 @@ typedef struct _arrayType{
   int baseDim;
 
 } arrayType;
+
+/* Estructura para manejar los arreglos al ser usados */
 
 typedef struct _arrayUse{
   char *array;

@@ -1,0 +1,16 @@
+Primero que nada el programa solo genera código intermedio, nunca llega a
+generar código ensamblador, maneja correctamente las funciones,excepto que no
+revisa que el tipo de regreso del return sea el adecuado, tiene arreglos
+implementados de forma correcta para guardarles valor y usarlos, el manejo de
+tipos en general es bueno, no se usa el tipo Double, solo float e int.
+No maneja estructuras, no maneja break, el return solo funciona si es la
+última intrucción de la función.
+Para manejar las intrucciones booleanas se usa la técnica de labels por
+"backpatching".
+Se crearon estructuras para que las tablas de símbolos sean manejadas en una
+pila, de igual forma se hizó una estructura lista de tipos para las funciones
+todo por medio de apuntadores.
+Hay un pequeño archivo llamado ensamblador.asm que contiene código de ejemplo
+en ensamblador.
+Se usó como plantilla el ejemplo de compilador básico dado.
+Se manejan todas las posibles producciones de una expresión.

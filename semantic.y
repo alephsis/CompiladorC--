@@ -496,13 +496,19 @@ void init(){
     init_table();
 }
 
+/* busca un id en todas las tablas de la pila */
+
 int existe(char *id){
     return search(id);
 }
 
+/* busca un id en la tabla al tope de la pila */
+
 int existeLocal(char *id){
     return searchLocal(id);
 }
+
+/* genera una nueva variable temporal */
 
 char* newTemp(){
   temporales++;
@@ -513,6 +519,8 @@ char* newTemp(){
   strcat(ret, num);
   return ret;
 }
+
+/* genera expresiones a partir de una operación */
 
 expresion operacion(expresion e1, expresion e2, char *op){
   temporales++;
@@ -626,8 +634,10 @@ char* getArrayWidth(char *t){
   return NULL; 
 }
 
+/* regresa el tamaño en bytes de un tipo dado */
+
 char* getWidth(char *t){
-  printf("entré con %s\n",t);
+  
   if(isInt(t))
     return "4";
   if(isFloat(t))
@@ -656,6 +666,7 @@ char* getWidth(char *t){
   return NULL; 
 }
 
+/* regresa el tamaño de una cadena dada */
  
 int getSize (char* s){
   int i = 0;
@@ -663,6 +674,8 @@ int getSize (char* s){
     i++;  
   return i;
 }
+
+/* regresa una expresion a partir de un número entero */
 
 expresion numero(int n){
     expresion e;
@@ -672,6 +685,7 @@ expresion numero(int n){
     return e;    
     }
 
+/* regresa una expresion a partir de un número real */
 expresion numeroReal(float n){
     expresion e;
     sprintf(e.dir, "%.3f", n);
@@ -680,6 +694,8 @@ expresion numeroReal(float n){
     return e;    
     }
 
+/* regresa una expresion a partir de un carácter */
+
 expresion character(char c){
     expresion e;
     sprintf(e.dir, "%c", c);
@@ -687,6 +703,8 @@ expresion character(char c){
     e.type = "char";
     return e;    
     }
+
+/* regresa una expresion a partir de una cadena */
 
 expresion string(char* s){
     expresion e;
@@ -697,6 +715,8 @@ expresion string(char* s){
     e.type = t;
     return e;    
     }
+
+/* regresa una expresion a partir de una llamada a función */
 
 expresion llamada(char* id){
   symbol* fun = isFunction(id);
@@ -716,6 +736,8 @@ expresion llamada(char* id){
   return e;  
 }
 
+/* regresa una expresion a partir de un arreglo */
+
 expresion array(arrayUse au){
   expresion* e = (expresion*)malloc(sizeof(expresion));
   e->type = au.type;
@@ -728,6 +750,8 @@ expresion array(arrayUse au){
   strcpy(e->dir,eDir);
   return *e;
 }
+
+/* regresa una expresion a partir de un identificador */
 
 expresion identificador(char *s){
   expresion* e = (expresion*)malloc(sizeof(expresion));
@@ -793,6 +817,8 @@ int main(int argc, char** argv){
     }
 }
 
+/* revisa si dos nodos de parametros son iguales */
+
 int npEquals(NodeParam* n1,NodeParam* n2){
   NodeParam* actual1 = n1;
   NodeParam* actual2 = n2;
@@ -807,8 +833,3 @@ int npEquals(NodeParam* n1,NodeParam* n2){
   return 0;
 }
 
-/*
-#include "attribs.h"
-#include "intermediate_code.c"
-#include "symbols.c"
-*/
